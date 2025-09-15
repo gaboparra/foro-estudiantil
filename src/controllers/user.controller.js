@@ -2,7 +2,9 @@ import User from "../models/User.js";
 
 export const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-password");
+    const user = await User.findById(req.params.id)
+      .select("-password")
+      .populate("posts");
     if (!user) return res.status(404).json({ message: "User not found" });
 
     res.json(user);
@@ -13,14 +15,13 @@ export const getUserById = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email} = req.body;
 
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     if (username) user.username = username;
     if (email) user.email = email;
-    if (password) user.password = password;
 
     const updatedUser = await user.save();
 
@@ -43,5 +44,38 @@ export const deleteUser = async (req, res) => {
     res.json({ message: "Successfully deleted user" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting user", error });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Both current and new password are required" });
+    }
+
+    if (newPassword.length < 6) {
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters long" });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error changing password", error });
   }
 };
