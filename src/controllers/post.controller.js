@@ -1,21 +1,44 @@
 import Post from "../models/Post.js";
 import User from "../models/User.js";
+import Forum from "../models/Forum.js";
 
 export const createPost = async (req, res) => {
   try {
-    const { title, content, author } = req.body;
+    const { title, content, author, forum } = req.body;
+
+    if (!title || !content || !author || !forum) {
+      return res.status(400).json({ message: "Title, content, author and forum are required" });
+    }
 
     const existingUser = await User.findById(author);
     if (!existingUser) {
       return res.status(404).json({ message: "Author not found" });
     }
 
-    const newPost = new Post({ title, content, author });
+    const existingForum = await Forum.findById(forum);
+    if (!existingForum) {
+      return res.status(404).json({ message: "Forum not found" });
+    }
+
+    const newPost = new Post({ title, content, author, forum });
     const savedPost = await newPost.save();
 
     await User.findByIdAndUpdate(author, { $push: { posts: savedPost._id } });
+    await Forum.findByIdAndUpdate(forum, { $push: { posts: savedPost._id } });
 
-    res.status(201).json(savedPost);
+    res.status(201).json({
+      message: "Post created successfully",
+      post: {
+        _id: savedPost._id,
+        title: savedPost.title,
+        content: savedPost.content,
+        forum: savedPost.forum,
+        author: {
+          _id: existingUser._id,
+          username: existingUser.username,
+        },
+      },
+    });
   } catch (error) {
     res.status(500).json({ message: "Error creating post", error });
   }
@@ -79,7 +102,12 @@ export const deletePost = async (req, res) => {
       $pull: { posts: post._id },
     });
 
+    await Forum.findByIdAndUpdate(post.forum, {
+      $pull: { posts: post._id },
+    });
+
     await post.deleteOne();
+
     res.json({ message: "Post deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting post", error });

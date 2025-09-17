@@ -9,6 +9,11 @@ const postSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    forum: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Forum",
+      required: true,
+    },
     comments: [
       {
         type: mongoose.Schema.Types.ObjectId,

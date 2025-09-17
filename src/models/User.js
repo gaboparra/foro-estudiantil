@@ -12,6 +12,12 @@ const userSchema = new mongoose.Schema(
         ref: "Post",
       },
     ],
+    forums: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Forum",
+      },
+    ],
   },
   { timestamps: true }
 );
