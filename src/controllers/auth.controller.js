@@ -2,9 +2,18 @@ import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
 
 export const registerUser = async (req, res) => {
-  const { username, email, password } = req.body;
-
   try {
+    const { username, email, password } = req.body;
+
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "The user already exists" });
@@ -19,7 +28,7 @@ export const registerUser = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (error) {
-    res.status(500).json({ message: "Error registering user", error });
+    res.status(500).json({ message: "Error registering user", error: error.message });
   }
 };
 
