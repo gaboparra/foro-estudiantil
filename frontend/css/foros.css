@@ -1,0 +1,31 @@
+body {
+  background-color: #f8f8f8;
+}
+
+#listaForos {
+  display: grid;
+  gap: 1rem;
+}
+
+.foro {
+  background: white;
+  border-radius: 5px;
+  padding: 1rem;
+  border: 1px solid #ddd;
+}
+
+.foro h3 {
+  margin: 0 0 0.5rem 0;
+}
+
+.foro p {
+  margin-bottom: 0.5rem;
+}
+
+.foro small {
+  color: #6c757d;
+}
+
+.foro .acciones {
+  margin-top: 0.5rem;
+}
