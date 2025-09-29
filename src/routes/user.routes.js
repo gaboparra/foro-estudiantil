@@ -13,5 +13,4 @@ router.put("/:id", updateUser);
 router.delete("/:id", deleteUser);
 router.put("/:id/change-password", changePassword);
 
-
 export default router;

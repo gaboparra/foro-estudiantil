@@ -5,20 +5,39 @@ export const getUserById = async (req, res) => {
     const user = await User.findById(req.params.id)
       .select("-password")
       .populate("posts");
-    if (!user) return res.status(404).json({ message: "User not found" });
 
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ message: "Error getting user", error });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      status: "success",
+      message: "User fetched successfully",
+      payload: user,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "Error getting user",
+      error: err.message,
+    });
   }
 };
 
 export const updateUser = async (req, res) => {
   try {
-    const { username, email} = req.body;
+    const { username, email } = req.body;
 
     const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
 
     if (username) user.username = username;
     if (email) user.email = email;
@@ -26,24 +45,45 @@ export const updateUser = async (req, res) => {
     const updatedUser = await user.save();
 
     res.json({
-      _id: updatedUser._id,
-      username: updatedUser.username,
-      email: updatedUser.email,
+      status: "success",
+      message: "User updated successfully",
+      payload: {
+        _id: updatedUser._id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+      },
     });
-  } catch (error) {
-    res.status(500).json({ message: "Error updating user", error });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "Error updating user",
+      error: err.message,
+    });
   }
 };
 
 export const deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
 
     await user.deleteOne();
-    res.json({ message: "Successfully deleted user" });
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting user", error });
+
+    res.json({
+      status: "success",
+      message: "User deleted successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "Error deleting user",
+      error: err.message,
+    });
   }
 };
 
@@ -52,26 +92,47 @@ export const changePassword = async (req, res) => {
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ message: "Both current and new password are required" });
+      return res.status(400).json({
+        status: "error",
+        message: "Both current and new password are required",
+      });
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters long" });
+      return res.status(400).json({
+        status: "error",
+        message: "Password must be at least 6 characters long",
+      });
     }
 
     const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
 
     const isMatch = await user.matchPassword(currentPassword);
     if (!isMatch) {
-      return res.status(401).json({ message: "Current password is incorrect" });
+      return res.status(401).json({
+        status: "error",
+        message: "Current password is incorrect",
+      });
     }
 
     user.password = newPassword;
     await user.save();
 
-    res.json({ message: "Password updated successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error changing password", error });
+    res.json({
+      status: "success",
+      message: "Password updated successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "Error changing password",
+      error: err.message,
+    });
   }
 };
