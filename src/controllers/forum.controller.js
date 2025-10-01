@@ -20,7 +20,11 @@ export const createForum = async (req, res) => {
       });
     }
 
-    const newForum = new Forum({ name, description, isPremium });
+     const newForum = new Forum({
+      name,
+      description,
+      isPremium: isPremium || false,
+    });
     const savedForum = await newForum.save();
 
     res.status(201).json({
@@ -151,6 +155,7 @@ export const joinForum = async (req, res) => {
           _id: forum._id,
           name: forum.name,
           description: forum.description,
+          isPremium: forum.isPremium,
           membersCount: forum.members.length,
         },
         user: {
@@ -211,6 +216,8 @@ export const leaveForum = async (req, res) => {
         forum: {
           _id: forum._id,
           name: forum.name,
+          // description: forum.description,
+          isPremium: forum.isPremium,
           membersCount: forum.members.length,
         },
         user: {
@@ -240,10 +247,10 @@ export const deleteForum = async (req, res) => {
       });
     }
 
-    // await User.updateMany(
-    //   { forums: forum._id },
-    //   { $pull: { forums: forum._id } }
-    // );
+    await User.updateMany(
+      { forums: forum._id },
+      { $pull: { forums: forum._id } }
+    );
 
     await forum.deleteOne();
 

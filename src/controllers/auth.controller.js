@@ -105,3 +105,75 @@ export const login = async (req, res) => {
     });
   }
 };
+
+export const changePassword = async (req, res) => {
+  try {
+    const { email, currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!email || !currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        status: "error",
+        message:"Email, current password, new password and confirmation are required",
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        status: "error",
+        message: "Passwords do not match",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        status: "error",
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({
+        status: "error",
+        message: "Current password is incorrect",
+      });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({
+      status: "success",
+      message: "Password updated successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "Error changing password",
+      error: err.message,
+    });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    res.json({
+      status: "success",
+      message: "User logged out successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "Error logging out",
+      error: err.message,
+    });
+  }
+};

@@ -4,6 +4,7 @@ const forumSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, unique: true, trim: true },
     description: { type: String, trim: true },
+    isPremium: { type: Boolean, default: false },
     members: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -16,7 +17,6 @@ const forumSchema = new mongoose.Schema(
         ref: "Post",
       },
     ],
-    // isPremium: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
