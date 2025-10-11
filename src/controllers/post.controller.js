@@ -1,6 +1,7 @@
 import Post from "../models/Post.js";
 import User from "../models/User.js";
 import Forum from "../models/Forum.js";
+import logger from "../config/logger.js";
 
 export const createPost = async (req, res) => {
   try {
@@ -50,6 +51,7 @@ export const createPost = async (req, res) => {
       },
     });
   } catch (error) {
+    logger.error("Error creating post:", error);
     res.status(500).json({
       status: "error",
       message: "Error creating post",
@@ -73,6 +75,7 @@ export const getPosts = async (req, res) => {
       payload: posts,
     });
   } catch (error) {
+    logger.error("Error fetching posts:", error);
     res.status(500).json({
       status: "error",
       message: "Error fetching posts",
@@ -103,6 +106,7 @@ export const getPostById = async (req, res) => {
       payload: post,
     });
   } catch (error) {
+    logger.error("Error fetching post:", error);
     res.status(500).json({
       status: "error",
       message: "Error fetching post",
@@ -141,6 +145,7 @@ export const updatePost = async (req, res) => {
       payload: updatedPost,
     });
   } catch (error) {
+    logger.error("Error updating post:", error);
     res.status(500).json({
       status: "error",
       message: "Error updating post",
@@ -174,6 +179,7 @@ export const deletePost = async (req, res) => {
       message: "Post deleted successfully",
     });
   } catch (error) {
+    logger.error("Error deleting post:", error);
     res.status(500).json({
       status: "error",
       message: "Error deleting post",

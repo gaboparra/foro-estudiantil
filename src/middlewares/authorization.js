@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import logger from "../config/logger.js";
 
 const authorization = async (req, res, next) => {
   try {
@@ -26,6 +27,7 @@ const authorization = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
+    logger.error(`Error en autorización: ${error.message}`);
     res.status(401).json({
       status: "error",
       message: "Not authorized, token failed",

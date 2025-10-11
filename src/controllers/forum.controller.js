@@ -1,5 +1,6 @@
 import Forum from "../models/Forum.js";
 import User from "../models/User.js";
+import logger from "../config/logger.js";
 
 export const createForum = async (req, res) => {
   try {
@@ -20,7 +21,7 @@ export const createForum = async (req, res) => {
       });
     }
 
-     const newForum = new Forum({
+    const newForum = new Forum({
       name,
       description,
       isPremium: isPremium || false,
@@ -33,6 +34,7 @@ export const createForum = async (req, res) => {
       payload: savedForum,
     });
   } catch (error) {
+    logger.error("Error creating forum:", error);
     res.status(500).json({
       status: "error",
       message: "Error creating forum",
@@ -58,6 +60,7 @@ export const getForums = async (req, res) => {
       payload: forums,
     });
   } catch (error) {
+    logger.error("Error fetching forums:", error);
     res.status(500).json({
       status: "error",
       message: "Error fetching forums",
@@ -100,6 +103,7 @@ export const getForumById = async (req, res) => {
       payload: forum,
     });
   } catch (error) {
+    logger.error("Error fetching forum:", error);
     res.status(500).json({
       status: "error",
       message: "Error fetching forum",
@@ -167,6 +171,7 @@ export const joinForum = async (req, res) => {
       },
     });
   } catch (error) {
+    logger.error("Error joining forum:", error);
     res.status(500).json({
       status: "error",
       message: "Error joining forum",
@@ -229,6 +234,7 @@ export const leaveForum = async (req, res) => {
       },
     });
   } catch (error) {
+    logger.error("Error leaving forum:", error);
     res.status(500).json({
       status: "error",
       message: "Error leaving forum",
@@ -259,6 +265,7 @@ export const deleteForum = async (req, res) => {
       message: "Forum deleted successfully",
     });
   } catch (error) {
+    logger.error("Error deleting forum:", error);
     res.status(500).json({
       status: "error",
       message: "Error deleting forum",

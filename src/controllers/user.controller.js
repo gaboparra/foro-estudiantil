@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import logger from "../config/logger.js";
 
 export const getUserById = async (req, res) => {
   try {
@@ -19,6 +20,7 @@ export const getUserById = async (req, res) => {
       payload: user,
     });
   } catch (err) {
+    logger.error("Error getting user:", err);
     res.status(500).json({
       status: "error",
       message: "Error getting user",
@@ -54,6 +56,7 @@ export const updateUser = async (req, res) => {
       },
     });
   } catch (err) {
+    logger.error("Error updating user:", err);
     res.status(500).json({
       status: "error",
       message: "Error updating user",
@@ -79,6 +82,7 @@ export const deleteUser = async (req, res) => {
       message: "User deleted successfully",
     });
   } catch (err) {
+    logger.error("Error deleting user:", err);
     res.status(500).json({
       status: "error",
       message: "Error deleting user",
@@ -129,6 +133,7 @@ export const changePassword = async (req, res) => {
       message: "Password updated successfully",
     });
   } catch (err) {
+    logger.error("Error changing password:", err);
     res.status(500).json({
       status: "error",
       message: "Error changing password",

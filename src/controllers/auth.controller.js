@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
+import logger from "../config/logger.js";
 
 export const register = async (req, res) => {
   try {
@@ -48,6 +49,7 @@ export const register = async (req, res) => {
       },
     });
   } catch (err) {
+    logger.error("Error registering user:", err);
     return res.status(500).json({
       status: "error",
       message: "Error registering user",
@@ -98,6 +100,7 @@ export const login = async (req, res) => {
       },
     });
   } catch (err) {
+    logger.error("Error logging in:", err);
     return res.status(500).json({
       status: "error",
       message: "Error logging in",
@@ -113,7 +116,8 @@ export const changePassword = async (req, res) => {
     if (!email || !currentPassword || !newPassword || !confirmPassword) {
       return res.status(400).json({
         status: "error",
-        message:"Email, current password, new password and confirmation are required",
+        message:
+          "Email, current password, new password and confirmation are required",
       });
     }
 
@@ -155,6 +159,7 @@ export const changePassword = async (req, res) => {
       message: "Password updated successfully",
     });
   } catch (err) {
+    logger.error("Error changing password:", err);
     res.status(500).json({
       status: "error",
       message: "Error changing password",
@@ -170,6 +175,7 @@ export const logout = async (req, res) => {
       message: "User logged out successfully",
     });
   } catch (err) {
+    logger.error("Error logging out:", err);
     res.status(500).json({
       status: "error",
       message: "Error logging out",

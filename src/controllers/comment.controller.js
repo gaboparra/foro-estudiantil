@@ -1,6 +1,7 @@
 import Comment from "../models/Comment.js";
 import Post from "../models/Post.js";
 import User from "../models/User.js";
+import logger from "../config/logger.js";
 
 export const createComment = async (req, res) => {
   try {
@@ -56,6 +57,7 @@ export const createComment = async (req, res) => {
       },
     });
   } catch (error) {
+    logger.error("Error creating comment:", error);
     res.status(500).json({
       status: "error",
       message: "Error creating comment",
@@ -78,6 +80,7 @@ export const getCommentsByPost = async (req, res) => {
       payload: comments,
     });
   } catch (error) {
+    logger.error("Error fetching comments:", error);
     res.status(500).json({
       status: "error",
       message: "Error fetching comments",
@@ -112,6 +115,7 @@ export const updateComment = async (req, res) => {
       payload: updatedComment,
     });
   } catch (error) {
+    logger.error("Error updating comment:", error);
     res.status(500).json({
       status: "error",
       message: "Error updating comment",
@@ -141,6 +145,7 @@ export const deleteComment = async (req, res) => {
       message: "Comment deleted successfully",
     });
   } catch (error) {
+    logger.error("Error deleting comment:", error);
     res.status(500).json({
       status: "error",
       message: "Error deleting comment",
