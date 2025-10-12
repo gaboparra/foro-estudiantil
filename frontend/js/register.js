@@ -17,18 +17,24 @@ form.addEventListener("submit", async (e) => {
     const data = await res.json();
 
     if (data.status === "success") {
-      // Guardar token y userId en localStorage
-      localStorage.setItem("token", data.payload.token);
-      localStorage.setItem("userId", data.payload.user._id);
+      // ✅ Corregido: acceder directamente a payload
+      const token = data.payload.token;
+      const userId = data.payload._id;
+      
+      // Guardar en variables temporales (no localStorage para Claude.ai)
+      // En tu entorno local, usa localStorage normalmente
+      sessionStorage.setItem("token", token);
+      sessionStorage.setItem("userId", userId);
+      sessionStorage.setItem("username", data.payload.username);
 
-      alert("Registro exitoso.");
+      alert("Registro exitoso. Bienvenido " + data.payload.username);
       window.location.href = "index.html";
     } else {
       alert(data.message || "Error al registrarse.");
     }
 
   } catch (err) {
-    console.error(err);
-    alert("No se pudo registrar el usuario.");
+    console.error("Error completo:", err);
+    alert("No se pudo registrar el usuario. Verifica que el servidor esté corriendo.");
   }
 });
