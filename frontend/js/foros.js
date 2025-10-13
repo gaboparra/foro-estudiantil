@@ -6,7 +6,7 @@ async function cargarForos() {
     const data = await res.json();
 
     if (data.status === "error") {
-      listaForosDiv.innerHTML = `<p class="text-center">${data.message}</p>`;
+      listaForosDiv.innerHTML = `<div class="no-foros"><p>${data.message}</p></div>`;
       return;
     }
 
@@ -14,38 +14,51 @@ async function cargarForos() {
     listaForosDiv.innerHTML = "";
 
     if (!foros || foros.length === 0) {
-      listaForosDiv.innerHTML = "<p class='text-center'>No hay foros creados.</p>";
+      listaForosDiv.innerHTML = `
+        <div class="no-foros">
+          <div class="no-foros-icon">📋</div>
+          <h3>No hay foros disponibles</h3>
+          <p>Sé el primero en crear uno desde la página de inicio</p>
+        </div>
+      `;
       return;
     }
 
     foros.forEach(foro => {
       const foroDiv = document.createElement("div");
-      foroDiv.classList.add("foro");
+      foroDiv.classList.add("foro-card");
+
+      const premiumBadge = foro.isPremium ? '<span class="badge-premium">Premium</span>' : '';
 
       foroDiv.innerHTML = `
-        <h3>${foro.name}</h3>
-        <p>${foro.description}</p>
-        <small>Miembros: ${foro.members?.length || 0}</small>
-        <div class="acciones">
-          <button class="btn btn-success btn-sm me-2" data-id="${foro._id}">Unirme</button>
-          <button class="btn btn-danger btn-sm" data-id="${foro._id}">Salir</button>
+        <div class="foro-header">
+          <h3 class="foro-title">${foro.name}</h3>
+          ${premiumBadge}
+        </div>
+        <p class="foro-description">${foro.description}</p>
+        <div class="foro-footer">
+          <div class="miembros-count">
+            👥 <strong>${foro.members?.length || 0}</strong> miembros
+          </div>
+          <div class="d-flex btn-group-acciones">
+            <button class="btn btn-success btn-sm" onclick="joinForum('${foro._id}')">Unirme</button>
+            <button class="btn btn-outline-danger btn-sm" onclick="leaveForum('${foro._id}')">Salir</button>
+          </div>
         </div>
       `;
 
       listaForosDiv.appendChild(foroDiv);
     });
 
-    document.querySelectorAll(".btn-success").forEach(btn =>
-      btn.addEventListener("click", () => joinForum(btn.dataset.id))
-    );
-
-    document.querySelectorAll(".btn-danger").forEach(btn =>
-      btn.addEventListener("click", () => leaveForum(btn.dataset.id))
-    );
-
   } catch (err) {
     console.error(err);
-    listaForosDiv.innerHTML = "<p class='text-center'>Error al cargar los foros.</p>";
+    listaForosDiv.innerHTML = `
+      <div class="no-foros">
+        <div class="no-foros-icon">⚠️</div>
+        <h3>Error al cargar los foros</h3>
+        <p>Por favor, intenta nuevamente más tarde</p>
+      </div>
+    `;
   }
 }
 
@@ -98,22 +111,5 @@ async function leaveForum(forumId) {
     alert("Error al salir del foro");
   }
 }
-
-// Logout
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  localStorage.removeItem("token");
-  alert("Sesión cerrada.");
-  window.location.href = "index.html";
-});
-
-// Perfil
-document.getElementById("perfilBtn").addEventListener("click", () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    alert("Debes iniciar sesión para ver el perfil.");
-  } else {
-    window.location.href = "perfil.html";
-  }
-});
 
 cargarForos();

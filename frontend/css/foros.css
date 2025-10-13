@@ -1,31 +1,73 @@
 body {
-  background-color: #f8f8f8;
+  background-color: #f8f9fa;
 }
 
-#listaForos {
-  display: grid;
-  gap: 1rem;
-}
-
-.foro {
+.foro-card {
   background: white;
-  border-radius: 5px;
-  padding: 1rem;
-  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
 }
 
-.foro h3 {
-  margin: 0 0 0.5rem 0;
+.foro-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
-.foro p {
-  margin-bottom: 0.5rem;
+.foro-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #212529;
+  margin: 0;
 }
 
-.foro small {
+.badge-premium {
+  background-color: #ffc107;
+  color: #000;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.foro-description {
+  color: #6c757d;
+  margin-bottom: 15px;
+}
+
+.foro-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid #e9ecef;
+}
+
+.miembros-count {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.miembros-count strong {
+  color: #495057;
+}
+
+.no-foros {
+  text-align: center;
+  padding: 60px 20px;
   color: #6c757d;
 }
 
-.foro .acciones {
-  margin-top: 0.5rem;
+.no-foros-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  opacity: 0.3;
+}
+
+.btn-group-acciones {
+  gap: 10px;
 }

@@ -17,15 +17,12 @@ form.addEventListener("submit", async (e) => {
     const data = await res.json();
 
     if (data.status === "success") {
-      // ✅ Corregido: acceder directamente a payload
       const token = data.payload.token;
       const userId = data.payload._id;
-      
-      // Guardar en variables temporales (no localStorage para Claude.ai)
-      // En tu entorno local, usa localStorage normalmente
-      sessionStorage.setItem("token", token);
-      sessionStorage.setItem("userId", userId);
-      sessionStorage.setItem("username", data.payload.username);
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("userId", userId);
+      localStorage.setItem("username", data.payload.username);
 
       alert("Registro exitoso. Bienvenido " + data.payload.username);
       window.location.href = "index.html";

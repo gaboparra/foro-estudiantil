@@ -16,7 +16,6 @@ form.addEventListener("submit", async (e) => {
     const data = await res.json();
 
     if (data.status === "success") {
-      // Guardar token y userId en localStorage
       localStorage.setItem("token", data.payload.token);
       localStorage.setItem("userId", data.payload.user._id);
 

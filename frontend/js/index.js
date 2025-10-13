@@ -1,4 +1,3 @@
-// Inicializar modal de Bootstrap
 const modalElement = document.getElementById("modal");
 const modal = new bootstrap.Modal(modalElement);
 
@@ -9,7 +8,6 @@ abrirModalBtn.addEventListener("click", () => {
   modal.show();
 });
 
-// Crear foro
 crearForoBtn.addEventListener("click", async () => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -50,22 +48,5 @@ crearForoBtn.addEventListener("click", async () => {
   } catch (error) {
     console.error(error);
     alert("Error al crear foro");
-  }
-});
-
-// Logout
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  localStorage.removeItem("token");
-  alert("Sesión cerrada.");
-  window.location.href = "index.html";
-});
-
-// Perfil
-document.getElementById("perfilBtn").addEventListener("click", () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    alert("Debes iniciar sesión para ver el perfil.");
-  } else {
-    window.location.href = "perfil.html";
   }
 });
