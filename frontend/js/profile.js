@@ -6,6 +6,8 @@ if (!token || !userId) {
   window.location.href = "login.html";
 }
 
+let currentUser = null;
+
 async function cargarPerfil() {
   try {
     const res = await fetch(`http://localhost:8080/api/users/${userId}`, {
@@ -21,17 +23,13 @@ async function cargarPerfil() {
       return;
     }
 
-    const user = data.payload;
+    currentUser = data.payload;
 
-    document.getElementById("username").textContent = user.username;
-    document.getElementById("email").textContent = user.email;
+    document.getElementById("username").textContent = currentUser.username;
+    document.getElementById("email").textContent = currentUser.email;
+    document.getElementById("bio").textContent = currentUser.bio || "Sin biografía";
 
-    // const fecha = new Date(user.createdAt).toLocaleDateString('es-ES', {
-    //   year: 'numeric',
-    //   month: 'long',
-    //   day: 'numeric'
-    // });
-    // document.getElementById("fechaRegistro").textContent = fecha;
+    cargarMisPosts(currentUser.posts);
 
   } catch (err) {
     console.error(err);
@@ -39,9 +37,72 @@ async function cargarPerfil() {
   }
 }
 
+function toggleEditMode() {
+  const viewMode = document.getElementById("viewMode");
+  const editMode = document.getElementById("editMode");
+
+  if (viewMode.style.display === "none") {
+    // Volver a vista
+    viewMode.style.display = "block";
+    editMode.style.display = "none";
+  } else {
+    // Cambiar a edición
+    document.getElementById("editUsername").value = currentUser.username;
+    document.getElementById("editEmail").value = currentUser.email;
+    document.getElementById("editBio").value = currentUser.bio || "";
+    
+    viewMode.style.display = "none";
+    editMode.style.display = "block";
+  }
+}
+
+document.getElementById("editProfileForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const username = document.getElementById("editUsername").value.trim();
+  const email = document.getElementById("editEmail").value.trim();
+  const bio = document.getElementById("editBio").value.trim();
+
+  if (!username || !email) {
+    alert("El nombre de usuario y email son obligatorios");
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:8080/api/users/${userId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ username, email, bio })
+    });
+
+    const data = await res.json();
+
+    if (data.status === "success") {
+      alert("Perfil actualizado exitosamente");
+      
+      // Actualizar localStorage si cambió el username
+      if (username !== currentUser.username) {
+        localStorage.setItem("username", username);
+      }
+
+      // Recargar perfil
+      await cargarPerfil();
+      toggleEditMode();
+    } else {
+      alert(data.message || "Error al actualizar el perfil");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Error al actualizar el perfil");
+  }
+});
+
 async function cargarMisForos() {
   try {
-    const res = await fetch("http://localhost:8080/api/forums");
+    const res = await fetch("http://localhost:8080/api/forums/");
     const data = await res.json();
 
     if (data.status === "error") {
@@ -53,7 +114,7 @@ async function cargarMisForos() {
     const misForosDiv = document.getElementById("misForos");
 
     const forosUsuario = foros.filter(foro =>
-      foro.members && foro.members.includes(userId)
+      foro.members && foro.members.some(member => member._id === userId || member === userId)
     );
 
     if (forosUsuario.length === 0) {
@@ -65,11 +126,18 @@ async function cargarMisForos() {
 
     forosUsuario.forEach(foro => {
       const foroDiv = document.createElement("div");
-      foroDiv.classList.add("foro-item");
+      foroDiv.classList.add("foro-item", "mb-3", "p-3", "border", "rounded");
+
+      const premiumBadge = foro.isPremium ? '<span class="badge bg-warning text-dark ms-2">Premium</span>' : '';
 
       foroDiv.innerHTML = `
-        <h5>${foro.name}</h5>
-        <p>${foro.description}</p>
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h5>${foro.name}${premiumBadge}</h5>
+            <p class="text-muted mb-0">${foro.description}</p>
+          </div>
+          <button class="btn btn-sm btn-primary" onclick="window.location.href='foros-detalle.html?id=${foro._id}'">Ver</button>
+        </div>
       `;
 
       misForosDiv.appendChild(foroDiv);
@@ -79,6 +147,32 @@ async function cargarMisForos() {
     console.error(err);
     document.getElementById("misForos").innerHTML = '<p class="text-muted">Error al cargar tus foros.</p>';
   }
+}
+
+function cargarMisPosts(posts) {
+  const misPostsDiv = document.getElementById("misPosts");
+
+  if (!posts || posts.length === 0) {
+    misPostsDiv.innerHTML = '<p class="text-muted">No has creado ninguna publicación.</p>';
+    return;
+  }
+
+  misPostsDiv.innerHTML = "";
+
+  posts.forEach(post => {
+    const postDiv = document.createElement("div");
+    postDiv.classList.add("post-item", "mb-3", "p-3", "border", "rounded");
+
+    const postDate = post.createdAt ? new Date(post.createdAt).toLocaleDateString() : 'Fecha desconocida';
+
+    postDiv.innerHTML = `
+      <h5>${post.title}</h5>
+      <p class="text-muted mb-2">${post.content.substring(0, 150)}${post.content.length > 150 ? '...' : ''}</p>
+      <small class="text-muted">Publicado el: ${postDate}</small>
+    `;
+
+    misPostsDiv.appendChild(postDiv);
+  });
 }
 
 cargarPerfil();

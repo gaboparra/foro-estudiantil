@@ -4,8 +4,9 @@ import logger from "../config/logger.js";
 export const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
-      .select("-password")
-      .populate("posts");
+      .select("-password -resetCode -resetCodeExpires")
+      .populate("posts")
+      .populate("forums");
 
     if (!user) {
       return res.status(404).json({
@@ -31,7 +32,7 @@ export const getUserById = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { username, email } = req.body;
+    const { username, email, bio } = req.body;
 
     const user = await User.findById(req.params.id);
     if (!user) {
@@ -41,8 +42,48 @@ export const updateUser = async (req, res) => {
       });
     }
 
-    if (username) user.username = username;
-    if (email) user.email = email;
+    // Validar que el username no esté en uso por otro usuario
+    if (username && username !== user.username) {
+      const existingUsername = await User.findOne({ username });
+      if (existingUsername) {
+        return res.status(400).json({
+          status: "error",
+          message: "Username already taken",
+        });
+      }
+      user.username = username;
+    }
+
+    // Validar que el email no esté en uso por otro usuario
+    if (email && email !== user.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          status: "error",
+          message: "Invalid email format",
+        });
+      }
+
+      const existingEmail = await User.findOne({ email });
+      if (existingEmail) {
+        return res.status(400).json({
+          status: "error",
+          message: "Email already registered",
+        });
+      }
+      user.email = email;
+    }
+
+    // Actualizar biografía
+    if (bio !== undefined) {
+      if (bio.length > 500) {
+        return res.status(400).json({
+          status: "error",
+          message: "Bio must be less than 500 characters",
+        });
+      }
+      user.bio = bio;
+    }
 
     const updatedUser = await user.save();
 
@@ -53,6 +94,7 @@ export const updateUser = async (req, res) => {
         _id: updatedUser._id,
         username: updatedUser.username,
         email: updatedUser.email,
+        bio: updatedUser.bio,
       },
     });
   } catch (err) {

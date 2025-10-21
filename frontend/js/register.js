@@ -2,7 +2,6 @@ const form = document.getElementById("registroForm");
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-
   const username = document.getElementById("username").value;
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -19,19 +18,29 @@ form.addEventListener("submit", async (e) => {
     if (data.status === "success") {
       const token = data.payload.token;
       const userId = data.payload._id;
-
       localStorage.setItem("token", token);
       localStorage.setItem("userId", userId);
       localStorage.setItem("username", data.payload.username);
 
-      alert("Registro exitoso. Bienvenido " + data.payload.username);
+      await Swal.fire({
+        title: 'ForoEstudio',
+        text: 'Registro exitoso. Bienvenido ' + data.payload.username,
+        confirmButtonText: 'Aceptar'
+      });
       window.location.href = "index.html";
     } else {
-      alert(data.message || "Error al registrarse.");
+      Swal.fire({
+        title: 'ForoEstudio',
+        text: data.message || "Error al registrarse.",
+        confirmButtonText: 'Aceptar'
+      });
     }
-
   } catch (err) {
     console.error("Error completo:", err);
-    alert("No se pudo registrar el usuario. Verifica que el servidor esté corriendo.");
+    Swal.fire({
+      title: 'ForoEstudio',
+      text: 'No se pudo registrar el usuario. Verifica que el servidor esté corriendo.',
+      confirmButtonText: 'Aceptar'
+    });
   }
 });

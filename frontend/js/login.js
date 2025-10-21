@@ -2,7 +2,6 @@ const form = document.getElementById("loginForm");
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
@@ -19,14 +18,25 @@ form.addEventListener("submit", async (e) => {
       localStorage.setItem("token", data.payload.token);
       localStorage.setItem("userId", data.payload.user._id);
 
-      alert("Inicio de sesión exitoso.");
+      await Swal.fire({
+        title: 'ForoEstudio',
+        text: 'Inicio de sesión exitoso.',
+        confirmButtonText: 'Aceptar'
+      });
       window.location.href = "./index.html";
     } else {
-      alert(data.message || "Error al iniciar sesión.");
+      Swal.fire({
+        title: 'ForoEstudio',
+        text: data.message || "Error al iniciar sesión.",
+        confirmButtonText: 'Aceptar'
+      });
     }
-
   } catch (err) {
     console.error(err);
-    alert("No se pudo iniciar sesión.");
+    Swal.fire({
+      title: 'ForoEstudio',
+      text: 'No se pudo iniciar sesión.',
+      confirmButtonText: 'Aceptar'
+    });
   }
 });

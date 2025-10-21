@@ -5,12 +5,12 @@ import logger from "../config/logger.js";
 
 export const createForum = async (req, res) => {
   try {
-    const { name, description, isPremium } = req.body;
+    const { name, description, isPremium, creator } = req.body;
 
-    if (!name || !description) {
+    if (!name || !description || !creator) {
       return res.status(400).json({
         status: "error",
-        message: "Name and description are required",
+        message: "Name, description and creator are required",
       });
     }
 
@@ -26,8 +26,13 @@ export const createForum = async (req, res) => {
       name,
       description,
       isPremium: isPremium || false,
+      creator,
+      members: [creator], // El creador se une automáticamente
     });
     const savedForum = await newForum.save();
+
+    // Agregar el foro a la lista de foros del usuario
+    await User.findByIdAndUpdate(creator, { $push: { forums: savedForum._id } });
 
     res.status(201).json({
       status: "success",
@@ -46,14 +51,16 @@ export const createForum = async (req, res) => {
 
 export const getForums = async (req, res) => {
   try {
-    const forums = await Forum.find().populate({
-      path: "posts",
-      select: "title content author",
-      populate: {
-        path: "author",
-        select: "username email",
-      },
-    });
+    const forums = await Forum.find()
+      .populate("creator", "username email")
+      .populate({
+        path: "posts",
+        select: "title content author createdAt",
+        populate: {
+          path: "author",
+          select: "username email",
+        },
+      });
 
     res.json({
       status: "success",
@@ -73,6 +80,7 @@ export const getForums = async (req, res) => {
 export const getForumById = async (req, res) => {
   try {
     const forum = await Forum.findById(req.params.id)
+      .populate("creator", "username email")
       .populate("members", "username email")
       .populate({
         path: "posts",
@@ -199,6 +207,14 @@ export const leaveForum = async (req, res) => {
       });
     }
 
+    // No permitir que el creador salga de su propio foro
+    if (forum.creator.toString() === userId) {
+      return res.status(400).json({
+        status: "error",
+        message: "Creator cannot leave their own forum. Delete it instead.",
+      });
+    }
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -245,6 +261,8 @@ export const leaveForum = async (req, res) => {
 
 export const deleteForum = async (req, res) => {
   try {
+    const { userId } = req.body;
+    
     const forum = await Forum.findById(req.params.id);
     if (!forum) {
       return res.status(404).json({

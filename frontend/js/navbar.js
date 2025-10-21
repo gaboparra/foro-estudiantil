@@ -5,9 +5,15 @@ if (localStorage.getItem("token")) {
   document.getElementById("navLogout").style.display = "block";
 }
 
-function cerrarSesion() {
+async function cerrarSesion() {
   localStorage.removeItem("token");
   localStorage.removeItem("userId");
-  alert("Sesión cerrada");
+
+  await Swal.fire({
+    title: 'ForoEstudio',
+    text: 'Sesión cerrada',
+    confirmButtonText: 'Aceptar'
+  });
+
   window.location.href = "index.html";
 }

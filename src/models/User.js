@@ -9,10 +9,10 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
-      trim: true,
       match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     },
     password: { type: String, required: true, minlength: 6 },
+    bio: { type: String, default: "", maxlength: 500 }, 
     posts: [
       {
         type: mongoose.Schema.Types.ObjectId,

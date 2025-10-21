@@ -30,6 +30,14 @@ export const createPost = async (req, res) => {
       });
     }
 
+    // Verificar que el usuario sea miembro del foro
+    if (!existingForum.members.includes(author)) {
+      return res.status(403).json({
+        status: "error",
+        message: "You must be a member of the forum to post",
+      });
+    }
+
     const newPost = new Post({ title, content, author, forum });
     const savedPost = await newPost.save();
 
@@ -48,6 +56,7 @@ export const createPost = async (req, res) => {
           _id: existingUser._id,
           username: existingUser.username,
         },
+        createdAt: savedPost.createdAt,
       },
     });
   } catch (error) {
@@ -64,10 +73,12 @@ export const getPosts = async (req, res) => {
   try {
     const posts = await Post.find()
       .populate("author", "username email")
+      .populate("forum", "name")
       .populate({
         path: "comments",
         populate: { path: "author", select: "username email" },
-      });
+      })
+      .sort({ createdAt: -1 });
 
     res.json({
       status: "success",
@@ -88,6 +99,7 @@ export const getPostById = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
       .populate("author", "username email")
+      .populate("forum", "name")
       .populate({
         path: "comments",
         populate: { path: "author", select: "username email" },
@@ -117,7 +129,7 @@ export const getPostById = async (req, res) => {
 
 export const updatePost = async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, userId } = req.body;
 
     if (!title && !content) {
       return res.status(400).json({
@@ -131,6 +143,14 @@ export const updatePost = async (req, res) => {
       return res.status(404).json({
         status: "error",
         message: "Post not found",
+      });
+    }
+
+    // Solo el autor puede editar el post
+    if (post.author.toString() !== userId) {
+      return res.status(403).json({
+        status: "error",
+        message: "Only the author can edit this post",
       });
     }
 
@@ -156,11 +176,21 @@ export const updatePost = async (req, res) => {
 
 export const deletePost = async (req, res) => {
   try {
+    const { userId } = req.body;
+
     const post = await Post.findById(req.params.id);
     if (!post) {
       return res.status(404).json({
         status: "error",
         message: "Post not found",
+      });
+    }
+
+    // Solo el autor puede eliminar el post
+    if (post.author.toString() !== userId) {
+      return res.status(403).json({
+        status: "error",
+        message: "Only the author can delete this post",
       });
     }
 
