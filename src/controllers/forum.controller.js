@@ -1,5 +1,6 @@
 import Forum from "../models/Forum.js";
 import User from "../models/User.js";
+import Post from "../models/Post.js";
 import logger from "../config/logger.js";
 
 export const createForum = async (req, res) => {
@@ -221,7 +222,6 @@ export const leaveForum = async (req, res) => {
         forum: {
           _id: forum._id,
           name: forum.name,
-          // description: forum.description,
           isPremium: forum.isPremium,
           membersCount: forum.members.length,
         },
@@ -251,6 +251,20 @@ export const deleteForum = async (req, res) => {
         status: "error",
         message: "Forum not found",
       });
+    }
+
+    const posts = await Post.find({ forum: forum._id });
+
+    if (posts.length > 0) {
+      const postIds = posts.map((p) => p._id);
+      const userIds = posts.map((p) => p.author);
+
+      await User.updateMany(
+        { _id: { $in: userIds } },
+        { $pull: { posts: { $in: postIds } } }
+      );
+
+      await Post.deleteMany({ forum: forum._id });
     }
 
     await User.updateMany(
