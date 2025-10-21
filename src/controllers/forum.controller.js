@@ -271,6 +271,14 @@ export const deleteForum = async (req, res) => {
       });
     }
 
+    // ✅ Validación: Solo el creador puede eliminar el foro
+    if (forum.creator.toString() !== userId) {
+      return res.status(403).json({
+        status: "error",
+        message: "Only the forum creator can delete it",
+      });
+    }
+
     const posts = await Post.find({ forum: forum._id });
 
     if (posts.length > 0) {
