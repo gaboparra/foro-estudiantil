@@ -30,7 +30,6 @@ export const createPost = async (req, res) => {
       });
     }
 
-    // Verificar que el usuario sea miembro del foro
     if (!existingForum.members.includes(author)) {
       return res.status(403).json({
         status: "error",
@@ -77,8 +76,7 @@ export const getPosts = async (req, res) => {
       .populate({
         path: "comments",
         populate: { path: "author", select: "username email" },
-      })
-      .sort({ createdAt: -1 });
+      });
 
     res.json({
       status: "success",
@@ -90,6 +88,65 @@ export const getPosts = async (req, res) => {
     res.status(500).json({
       status: "error",
       message: "Error fetching posts",
+      error: error.message,
+    });
+  }
+};
+
+export const getPostsSortedByDate = async (req, res) => {
+  try {
+    const { order } = req.query; // 'asc' o 'desc' (default: desc)
+    const sortOrder = order === "asc" ? 1 : -1;
+
+    const posts = await Post.find()
+      .populate("author", "username email")
+      .populate("forum", "name")
+      .populate({
+        path: "comments",
+        populate: { path: "author", select: "username email" },
+      })
+      .sort({ createdAt: sortOrder });
+
+    res.json({
+      status: "success",
+      message: "Posts fetched and sorted by date successfully",
+      payload: posts,
+    });
+  } catch (error) {
+    logger.error("Error fetching sorted posts:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Error fetching sorted posts",
+      error: error.message,
+    });
+  }
+};
+
+export const getForumPostsSortedByDate = async (req, res) => {
+  try {
+    const { forumId } = req.params;
+    const { order } = req.query; // 'asc' o 'desc' (default: desc)
+    const sortOrder = order === "asc" ? 1 : -1;
+
+    const posts = await Post.find({ forum: forumId })
+      .populate("author", "username email")
+      .populate("forum", "name")
+      .populate({
+        path: "comments",
+        populate: { path: "author", select: "username email" },
+      })
+      .sort({ createdAt: sortOrder });
+
+    res.json({
+      status: "success",
+      message: "Forum posts fetched and sorted by date successfully",
+      payload: posts,
+    });
+  } catch (error) {
+    logger.error("Error fetching sorted forum posts:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Error fetching sorted forum posts",
       error: error.message,
     });
   }
@@ -146,7 +203,6 @@ export const updatePost = async (req, res) => {
       });
     }
 
-    // Solo el autor puede editar el post
     if (post.author.toString() !== userId) {
       return res.status(403).json({
         status: "error",
@@ -186,7 +242,6 @@ export const deletePost = async (req, res) => {
       });
     }
 
-    // Solo el autor puede eliminar el post
     if (post.author.toString() !== userId) {
       return res.status(403).json({
         status: "error",

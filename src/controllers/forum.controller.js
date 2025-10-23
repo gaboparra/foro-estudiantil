@@ -27,12 +27,13 @@ export const createForum = async (req, res) => {
       description,
       isPremium: isPremium || false,
       creator,
-      members: [creator], // El creador se une automáticamente
+      members: [creator],
     });
     const savedForum = await newForum.save();
 
-    // Agregar el foro a la lista de foros del usuario
-    await User.findByIdAndUpdate(creator, { $push: { forums: savedForum._id } });
+    await User.findByIdAndUpdate(creator, {
+      $push: { forums: savedForum._id },
+    });
 
     res.status(201).json({
       status: "success",
@@ -207,7 +208,6 @@ export const leaveForum = async (req, res) => {
       });
     }
 
-    // No permitir que el creador salga de su propio foro
     if (forum.creator.toString() === userId) {
       return res.status(400).json({
         status: "error",
@@ -262,7 +262,7 @@ export const leaveForum = async (req, res) => {
 export const deleteForum = async (req, res) => {
   try {
     const { userId } = req.body;
-    
+
     const forum = await Forum.findById(req.params.id);
     if (!forum) {
       return res.status(404).json({
@@ -271,7 +271,6 @@ export const deleteForum = async (req, res) => {
       });
     }
 
-    // ✅ Validación: Solo el creador puede eliminar el foro
     if (forum.creator.toString() !== userId) {
       return res.status(403).json({
         status: "error",

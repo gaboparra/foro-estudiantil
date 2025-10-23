@@ -42,7 +42,6 @@ export const updateUser = async (req, res) => {
       });
     }
 
-    // Validar que el username no esté en uso por otro usuario
     if (username && username !== user.username) {
       const existingUsername = await User.findOne({ username });
       if (existingUsername) {
@@ -54,7 +53,6 @@ export const updateUser = async (req, res) => {
       user.username = username;
     }
 
-    // Validar que el email no esté en uso por otro usuario
     if (email && email !== user.email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
@@ -74,7 +72,6 @@ export const updateUser = async (req, res) => {
       user.email = email;
     }
 
-    // Actualizar biografía
     if (bio !== undefined) {
       if (bio.length > 500) {
         return res.status(400).json({
