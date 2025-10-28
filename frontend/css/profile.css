@@ -39,17 +39,6 @@ body {
   word-wrap: break-word;
 }
 
-.foro-item,
-.post-item {
-  transition: transform 0.2s;
-}
-
-.foro-item:hover,
-.post-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
 .foro-item h5,
 .post-item h5 {
   margin-bottom: 10px;

@@ -175,5 +175,69 @@ function cargarMisPosts(posts) {
   });
 }
 
+// Función para resetear el formulario de contraseña
+function resetPasswordForm() {
+  document.getElementById("changePasswordForm").reset();
+}
+
+// Event listener para el formulario de cambio de contraseña
+document.getElementById("changePasswordForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const currentPassword = document.getElementById("currentPassword").value.trim();
+  const newPassword = document.getElementById("newPassword").value.trim();
+  const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+  // Validar que las contraseñas no estén vacías
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    Swal.fire("Todos los campos son obligatorios");
+    return;
+  }
+
+  // Validar longitud mínima
+  if (newPassword.length < 6) {
+    Swal.fire("La nueva contraseña debe tener al menos 6 caracteres");
+    return;
+  }
+
+  // Validar que las nuevas contraseñas coincidan
+  if (newPassword !== confirmPassword) {
+    Swal.fire("Las contraseñas no coinciden");
+    return;
+  }
+
+  // Validar que la nueva contraseña sea diferente a la actual
+  if (currentPassword === newPassword) {
+    Swal.fire("La nueva contraseña debe ser diferente a la actual");
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:8080/api/users/${userId}/change-password`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        currentPassword,
+        newPassword
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.status === "success") {
+      Swal.fire("Contraseña actualizada exitosamente");
+      resetPasswordForm();
+    } else {
+      Swal.fire(data.message || "Error al cambiar la contraseña");
+    }
+  } catch (err) {
+    console.error(err);
+    Swal.fire("Error al cambiar la contraseña");
+  }
+});
+
 cargarPerfil();
 cargarMisForos();
