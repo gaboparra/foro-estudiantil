@@ -5,7 +5,7 @@ const token = localStorage.getItem("token");
 
 let currentEditPostId = null;
 let currentEditCommentId = null;
-let currentSortOrder = 'desc'; // 🆕 Estado del ordenamiento (desc = más nuevas)
+let currentSortOrder = 'desc';
 const editModal = new bootstrap.Modal(document.getElementById('editPostModal'));
 const editCommentModal = new bootstrap.Modal(document.getElementById('editCommentModal'));
 
@@ -23,11 +23,11 @@ async function loadForumDetails() {
     const forum = data.payload;
     const forumInfoDiv = document.getElementById("forumInfo");
     const createPostSection = document.getElementById("createPostSection");
-    
+
     const premiumBadge = forum.isPremium ? '<span class="badge bg-warning">Premium</span>' : '';
     const isCreator = forum.creator._id === userId;
     const isMember = forum.members.some(m => m._id === userId);
-    
+
     let deleteButton = '';
     if (isCreator) {
       deleteButton = `<button class="btn btn-danger btn-sm" onclick="deleteForum()">Eliminar Foro</button>`;
@@ -82,18 +82,18 @@ async function loadPostsSorted() {
 function toggleSortOrder() {
   currentSortOrder = currentSortOrder === 'desc' ? 'asc' : 'desc';
   loadPostsSorted();
-  
+
   const sortBtn = document.getElementById('sortButton');
   if (sortBtn) {
-    sortBtn.innerHTML = currentSortOrder === 'desc' 
-      ? '🔽 Más nuevas primero' 
+    sortBtn.innerHTML = currentSortOrder === 'desc'
+      ? '🔽 Más nuevas primero'
       : '🔼 Más antiguas primero';
   }
 }
 
 function loadPosts(posts) {
   const postsListDiv = document.getElementById("postsList");
-  
+
   if (!posts || posts.length === 0) {
     postsListDiv.innerHTML = `
       <p class="text-muted">No hay publicaciones aún</p>
@@ -119,12 +119,12 @@ function loadPosts(posts) {
       hour: '2-digit',
       minute: '2-digit'
     });
-    
+
     let actionButtons = '';
     if (isAuthor) {
       const safeTitle = post.title.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
       const safeContent = post.content.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
-      
+
       actionButtons = `
         <div class="mt-2">
           <button class="btn btn-sm btn-outline-primary" onclick='openEditModal("${post._id}", "${safeTitle}", "${safeContent}")'>Editar</button>
@@ -162,16 +162,16 @@ function loadPosts(posts) {
         </div>
       </div>
     `;
-    
+
     postsListDiv.appendChild(postDiv);
-    
+
     loadComments(post._id, post.comments);
   });
 }
 
 async function loadComments(postId, commentsData) {
   const commentsDiv = document.getElementById(`comments-${postId}`);
-  
+
   if (!commentsData || commentsData.length === 0) {
     commentsDiv.innerHTML = '<p class="text-muted small">No hay comentarios todavía</p>';
     return;
@@ -182,11 +182,11 @@ async function loadComments(postId, commentsData) {
   commentsData.forEach(comment => {
     const isCommentAuthor = comment.author._id === userId;
     const commentDate = new Date(comment.createdAt).toLocaleDateString();
-    
+
     let commentActions = '';
     if (isCommentAuthor) {
       const safeContent = comment.content.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
-      
+
       commentActions = `
         <div class="comment-actions">
           <button class="btn btn-sm btn-link p-0 me-2" onclick='openEditCommentModal("${comment._id}", "${safeContent}")'>Editar</button>
@@ -207,7 +207,7 @@ async function loadComments(postId, commentsData) {
         ${commentActions}
       </div>
     `;
-    
+
     commentsDiv.appendChild(commentDiv);
   });
 }

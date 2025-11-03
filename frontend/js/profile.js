@@ -42,15 +42,13 @@ function toggleEditMode() {
   const editMode = document.getElementById("editMode");
 
   if (viewMode.style.display === "none") {
-    // Volver a vista
     viewMode.style.display = "block";
     editMode.style.display = "none";
   } else {
-    // Cambiar a edición
     document.getElementById("editUsername").value = currentUser.username;
     document.getElementById("editEmail").value = currentUser.email;
     document.getElementById("editBio").value = currentUser.bio || "";
-    
+
     viewMode.style.display = "none";
     editMode.style.display = "block";
   }
@@ -82,13 +80,11 @@ document.getElementById("editProfileForm").addEventListener("submit", async (e) 
 
     if (data.status === "success") {
       alert("Perfil actualizado exitosamente");
-      
-      // Actualizar localStorage si cambió el username
+
       if (username !== currentUser.username) {
         localStorage.setItem("username", username);
       }
 
-      // Recargar perfil
       await cargarPerfil();
       toggleEditMode();
     } else {
@@ -136,7 +132,7 @@ async function cargarMisForos() {
             <h5>${foro.name}${premiumBadge}</h5>
             <p class="text-muted mb-0">${foro.description}</p>
           </div>
-          <button class="btn btn-sm btn-primary" onclick="window.location.href='foros-detalle.html?id=${foro._id}'">Ver</button>
+          <button class="btn btn-sm btn-primary" onclick="window.location.href='forum-detalle.html?id=${foro._id}'">Ver</button>
         </div>
       `;
 
@@ -175,12 +171,10 @@ function cargarMisPosts(posts) {
   });
 }
 
-// Función para resetear el formulario de contraseña
 function resetPasswordForm() {
   document.getElementById("changePasswordForm").reset();
 }
 
-// Event listener para el formulario de cambio de contraseña
 document.getElementById("changePasswordForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -188,25 +182,21 @@ document.getElementById("changePasswordForm").addEventListener("submit", async (
   const newPassword = document.getElementById("newPassword").value.trim();
   const confirmPassword = document.getElementById("confirmPassword").value.trim();
 
-  // Validar que las contraseñas no estén vacías
   if (!currentPassword || !newPassword || !confirmPassword) {
     Swal.fire("Todos los campos son obligatorios");
     return;
   }
 
-  // Validar longitud mínima
   if (newPassword.length < 6) {
     Swal.fire("La nueva contraseña debe tener al menos 6 caracteres");
     return;
   }
 
-  // Validar que las nuevas contraseñas coincidan
   if (newPassword !== confirmPassword) {
     Swal.fire("Las contraseñas no coinciden");
     return;
   }
 
-  // Validar que la nueva contraseña sea diferente a la actual
   if (currentPassword === newPassword) {
     Swal.fire("La nueva contraseña debe ser diferente a la actual");
     return;

@@ -28,19 +28,19 @@ crearForoBtn.addEventListener("click", async () => {
   const token = localStorage.getItem("token");
 
   if (!name || !description) {
-    Swal.fire({ 
-      title: 'ForoEstudio', 
-      text: 'Por favor completa todos los campos', 
-      confirmButtonText: 'Aceptar' 
+    Swal.fire({
+      title: 'ForoEstudio',
+      text: 'Por favor completa todos los campos',
+      confirmButtonText: 'Aceptar'
     });
     return;
   }
 
   if (!creator || !token) {
-    Swal.fire({ 
-      title: 'ForoEstudio', 
-      text: 'Debes iniciar sesión', 
-      confirmButtonText: 'Aceptar' 
+    Swal.fire({
+      title: 'ForoEstudio',
+      text: 'Debes iniciar sesión',
+      confirmButtonText: 'Aceptar'
     }).then(() => {
       window.location.href = "login.html";
     });
@@ -60,31 +60,31 @@ crearForoBtn.addEventListener("click", async () => {
     const data = await res.json();
 
     if (data.status === "success") {
-      await Swal.fire({ 
-        title: 'ForoEstudio', 
-        text: 'Foro creado exitosamente', 
-        confirmButtonText: 'Aceptar' 
+      await Swal.fire({
+        title: 'ForoEstudio',
+        text: 'Foro creado exitosamente',
+        confirmButtonText: 'Aceptar'
       });
       modal.hide();
-      
+
       document.getElementById("forumName").value = '';
       document.getElementById("forumDescription").value = '';
       document.getElementById("forumPremium").checked = false;
-      
+
       cargarForos();
     } else {
-      Swal.fire({ 
-        title: 'ForoEstudio', 
-        text: data.message || 'Error al crear el foro', 
-        confirmButtonText: 'Aceptar' 
+      Swal.fire({
+        title: 'ForoEstudio',
+        text: data.message || 'Error al crear el foro',
+        confirmButtonText: 'Aceptar'
       });
     }
   } catch (err) {
     console.error(err);
-    Swal.fire({ 
-      title: 'ForoEstudio', 
-      text: 'Error al crear el foro. Verifica tu conexión.', 
-      confirmButtonText: 'Aceptar' 
+    Swal.fire({
+      title: 'ForoEstudio',
+      text: 'Error al crear el foro. Verifica tu conexión.',
+      confirmButtonText: 'Aceptar'
     });
   }
 });
@@ -115,14 +115,14 @@ async function cargarForos() {
     foros.forEach(foro => {
       const foroDiv = document.createElement("div");
       foroDiv.classList.add("foro-card");
-      
+
       if (foro.isPinned) {
         foroDiv.classList.add("foro-pinned");
       }
 
       const premiumBadge = foro.isPremium ? '<span class="badge-premium">Premium</span>' : '';
       const pinnedBadge = foro.isPinned ? '<span class="badge-pinned">Fijado</span>' : '';
-      
+
       const isCreator = foro.creator._id === userId;
       const isMember = foro.members.some(member => member._id === userId);
 

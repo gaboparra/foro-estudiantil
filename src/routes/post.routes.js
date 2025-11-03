@@ -7,20 +7,18 @@ import {
   deletePost,
   getPostsSortedByDate,
   getForumPostsSortedByDate,
+  getRandomPosts,
 } from "../controllers/post.controller.js";
-import { getRandomPosts } from "../controllers/forum.controller.js"; 
 
 const router = Router();
+
+router.get("/random", getRandomPosts);
+router.get("/sorted/date", getPostsSortedByDate);
+router.get("/forums/:forumId/posts/sorted/date", getForumPostsSortedByDate);
 
 router.post("/", createPost);
 router.get("/", getPosts);
 
-
-router.get("/random", getRandomPosts); 
-router.get("/sorted/date", getPostsSortedByDate);
-
-
-router.get("/forums/:forumId/posts/sorted/date", getForumPostsSortedByDate);
 router.get("/:id", getPostById);
 router.put("/:id", updatePost);
 router.delete("/:id", deletePost);
