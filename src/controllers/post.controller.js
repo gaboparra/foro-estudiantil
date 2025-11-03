@@ -95,7 +95,7 @@ export const getPosts = async (req, res) => {
 
 export const getPostsSortedByDate = async (req, res) => {
   try {
-    const { order } = req.query; // 'asc' o 'desc' (default: desc)
+    const { order } = req.query; 
     const sortOrder = order === "asc" ? 1 : -1;
 
     const posts = await Post.find()
@@ -125,7 +125,7 @@ export const getPostsSortedByDate = async (req, res) => {
 export const getForumPostsSortedByDate = async (req, res) => {
   try {
     const { forumId } = req.params;
-    const { order } = req.query; // 'asc' o 'desc' (default: desc)
+    const { order } = req.query; 
     const sortOrder = order === "asc" ? 1 : -1;
 
     const posts = await Post.find({ forum: forumId })

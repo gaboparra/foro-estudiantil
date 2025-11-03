@@ -1,4 +1,3 @@
-// src/routes/forum.routes.js
 import { Router } from "express";
 import {
   createForum,

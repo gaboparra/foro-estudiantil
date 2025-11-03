@@ -8,18 +8,18 @@ import {
   getPostsSortedByDate,
   getForumPostsSortedByDate,
 } from "../controllers/post.controller.js";
-import { getRandomPosts } from "../controllers/forum.controller.js"; // 🆕 Importar desde forum.controller
+import { getRandomPosts } from "../controllers/forum.controller.js"; 
 
 const router = Router();
 
 router.post("/", createPost);
 router.get("/", getPosts);
 
-// 🚨 IMPORTANTE: Las rutas específicas ANTES de las rutas con parámetros
-router.get("/random", getRandomPosts); // 🆕 DEBE ir ANTES de /:id
+
+router.get("/random", getRandomPosts); 
 router.get("/sorted/date", getPostsSortedByDate);
 
-// Rutas con parámetros van al final
+
 router.get("/forums/:forumId/posts/sorted/date", getForumPostsSortedByDate);
 router.get("/:id", getPostById);
 router.put("/:id", updatePost);

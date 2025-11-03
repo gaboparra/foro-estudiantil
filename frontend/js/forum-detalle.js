@@ -63,7 +63,6 @@ async function loadForumDetails() {
   }
 }
 
-// 🆕 Función para cargar posts ordenados
 async function loadPostsSorted() {
   try {
     const res = await fetch(
@@ -80,12 +79,10 @@ async function loadPostsSorted() {
   }
 }
 
-// 🆕 Función para cambiar el orden
 function toggleSortOrder() {
   currentSortOrder = currentSortOrder === 'desc' ? 'asc' : 'desc';
   loadPostsSorted();
   
-  // Actualizar el texto del botón
   const sortBtn = document.getElementById('sortButton');
   if (sortBtn) {
     sortBtn.innerHTML = currentSortOrder === 'desc' 
@@ -104,7 +101,6 @@ function loadPosts(posts) {
     return;
   }
 
-  // 🆕 Agregar botón de ordenamiento
   postsListDiv.innerHTML = `
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h3 class="mb-0">Publicaciones (${posts.length})</h3>

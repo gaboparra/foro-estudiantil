@@ -50,11 +50,10 @@ export const createForum = async (req, res) => {
   }
 };
 
-// ✅ SOLO UNA función getForums con ordenamiento por isPinned
 export const getForums = async (req, res) => {
   try {
     const forums = await Forum.find()
-      .sort({ isPinned: -1, createdAt: -1 }) // Fijados primero, luego por fecha
+      .sort({ isPinned: -1, createdAt: -1 }) 
       .populate("creator", "username email")
       .populate({
         path: "posts",
@@ -315,7 +314,6 @@ export const deleteForum = async (req, res) => {
   }
 };
 
-// 🆕 Función para obtener posts random
 export const getRandomPosts = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
@@ -348,7 +346,6 @@ export const getRandomPosts = async (req, res) => {
   }
 };
 
-// 🆕 Función para fijar/desfijar un foro
 export const togglePinForum = async (req, res) => {
   try {
     const { userId } = req.body;
@@ -361,7 +358,6 @@ export const togglePinForum = async (req, res) => {
       });
     }
 
-    // Solo el creador puede fijar/desfijar
     if (forum.creator.toString() !== userId) {
       return res.status(403).json({
         status: "error",
