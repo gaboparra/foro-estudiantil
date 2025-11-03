@@ -1,3 +1,4 @@
+// src/routes/forum.routes.js
 import { Router } from "express";
 import {
   createForum,
@@ -6,6 +7,7 @@ import {
   joinForum,
   leaveForum,
   deleteForum,
+  togglePinForum, 
 } from "../controllers/forum.controller.js";
 
 const router = Router();
@@ -16,5 +18,6 @@ router.get("/:id", getForumById);
 router.post("/:id/join", joinForum);
 router.post("/:id/leave", leaveForum);
 router.delete("/:id", deleteForum);
+router.put("/:id/pin", togglePinForum); 
 
 export default router;

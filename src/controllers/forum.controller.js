@@ -50,9 +50,11 @@ export const createForum = async (req, res) => {
   }
 };
 
+// ✅ SOLO UNA función getForums con ordenamiento por isPinned
 export const getForums = async (req, res) => {
   try {
     const forums = await Forum.find()
+      .sort({ isPinned: -1, createdAt: -1 }) // Fijados primero, luego por fecha
       .populate("creator", "username email")
       .populate({
         path: "posts",
@@ -308,6 +310,82 @@ export const deleteForum = async (req, res) => {
     res.status(500).json({
       status: "error",
       message: "Error deleting forum",
+      error: error.message,
+    });
+  }
+};
+
+// 🆕 Función para obtener posts random
+export const getRandomPosts = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    
+    const posts = await Post.aggregate([
+      { $sample: { size: limit } }
+    ]);
+
+    const populatedPosts = await Post.populate(posts, [
+      { path: 'author', select: 'username email' },
+      { path: 'forum', select: 'name' },
+      { 
+        path: 'comments',
+        populate: { path: 'author', select: 'username email' }
+      }
+    ]);
+
+    res.json({
+      status: "success",
+      message: "Random posts fetched successfully",
+      payload: populatedPosts,
+    });
+  } catch (error) {
+    logger.error("Error fetching random posts:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Error fetching random posts",
+      error: error.message,
+    });
+  }
+};
+
+// 🆕 Función para fijar/desfijar un foro
+export const togglePinForum = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const forum = await Forum.findById(req.params.id);
+    if (!forum) {
+      return res.status(404).json({
+        status: "error",
+        message: "Forum not found",
+      });
+    }
+
+    // Solo el creador puede fijar/desfijar
+    if (forum.creator.toString() !== userId) {
+      return res.status(403).json({
+        status: "error",
+        message: "Only the forum creator can pin/unpin it",
+      });
+    }
+
+    forum.isPinned = !forum.isPinned;
+    await forum.save();
+
+    res.json({
+      status: "success",
+      message: `Forum ${forum.isPinned ? 'pinned' : 'unpinned'} successfully`,
+      payload: {
+        _id: forum._id,
+        name: forum.name,
+        isPinned: forum.isPinned,
+      },
+    });
+  } catch (error) {
+    logger.error("Error toggling pin forum:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Error toggling pin forum",
       error: error.message,
     });
   }

@@ -2,6 +2,93 @@ const listaForosDiv = document.getElementById("listaForos");
 const userId = localStorage.getItem("userId");
 const token = localStorage.getItem("token");
 
+const abrirModalBtn = document.getElementById("abrirModalBtn");
+const crearForoBtn = document.getElementById("crearForoBtn");
+const modal = new bootstrap.Modal(document.getElementById("modal"));
+
+abrirModalBtn.addEventListener("click", () => {
+  if (!token) {
+    Swal.fire({
+      title: 'ForoEstudio',
+      text: 'Debes iniciar sesión para crear un foro',
+      confirmButtonText: 'Aceptar'
+    }).then(() => {
+      window.location.href = "login.html";
+    });
+    return;
+  }
+  modal.show();
+});
+
+crearForoBtn.addEventListener("click", async () => {
+  const name = document.getElementById("forumName").value.trim();
+  const description = document.getElementById("forumDescription").value.trim();
+  const isPremium = document.getElementById("forumPremium").checked;
+  const creator = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
+
+  if (!name || !description) {
+    Swal.fire({ 
+      title: 'ForoEstudio', 
+      text: 'Por favor completa todos los campos', 
+      confirmButtonText: 'Aceptar' 
+    });
+    return;
+  }
+
+  if (!creator || !token) {
+    Swal.fire({ 
+      title: 'ForoEstudio', 
+      text: 'Debes iniciar sesión', 
+      confirmButtonText: 'Aceptar' 
+    }).then(() => {
+      window.location.href = "login.html";
+    });
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:8080/api/forums", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ name, description, isPremium, creator })
+    });
+
+    const data = await res.json();
+
+    if (data.status === "success") {
+      await Swal.fire({ 
+        title: 'ForoEstudio', 
+        text: 'Foro creado exitosamente', 
+        confirmButtonText: 'Aceptar' 
+      });
+      modal.hide();
+      
+      document.getElementById("forumName").value = '';
+      document.getElementById("forumDescription").value = '';
+      document.getElementById("forumPremium").checked = false;
+      
+      cargarForos();
+    } else {
+      Swal.fire({ 
+        title: 'ForoEstudio', 
+        text: data.message || 'Error al crear el foro', 
+        confirmButtonText: 'Aceptar' 
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    Swal.fire({ 
+      title: 'ForoEstudio', 
+      text: 'Error al crear el foro. Verifica tu conexión.', 
+      confirmButtonText: 'Aceptar' 
+    });
+  }
+});
+
 async function cargarForos() {
   try {
     const res = await fetch("http://localhost:8080/api/forums");
@@ -19,7 +106,7 @@ async function cargarForos() {
       listaForosDiv.innerHTML = `
         <div class="no-foros">
           <h3>No hay foros disponibles</h3>
-          <p>Sé el primero en crear uno desde la página de inicio</p>
+          <p>Sé el primero en crear uno</p>
         </div>
       `;
       return;
@@ -28,8 +115,14 @@ async function cargarForos() {
     foros.forEach(foro => {
       const foroDiv = document.createElement("div");
       foroDiv.classList.add("foro-card");
+      
+      if (foro.isPinned) {
+        foroDiv.classList.add("foro-pinned");
+      }
 
       const premiumBadge = foro.isPremium ? '<span class="badge-premium">Premium</span>' : '';
+      const pinnedBadge = foro.isPinned ? '<span class="badge-pinned">Fijado</span>' : '';
+      
       const isCreator = foro.creator._id === userId;
       const isMember = foro.members.some(member => member._id === userId);
 
@@ -40,15 +133,24 @@ async function cargarForos() {
         memberButtons = `<button class="btn btn-outline-danger btn-sm" onclick="leaveForum('${foro._id}')">Salir</button>`;
       }
 
-      let deleteButton = '';
+      let creatorButtons = '';
       if (isCreator) {
-        deleteButton = `<button class="btn btn-danger btn-sm ms-2" onclick="deleteForum('${foro._id}')">Eliminar</button>`;
+        const pinText = foro.isPinned ? 'Desfijar' : 'Fijar';
+        creatorButtons = `
+          <button class="btn btn-warning btn-sm ms-2" onclick="togglePinForum('${foro._id}')">
+            ${pinText}
+          </button>
+          <button class="btn btn-danger btn-sm ms-2" onclick="deleteForum('${foro._id}')">Eliminar</button>
+        `;
       }
 
       foroDiv.innerHTML = `
         <div class="foro-header">
           <h3 class="foro-title">${foro.name}</h3>
-          ${premiumBadge}
+          <div>
+            ${pinnedBadge}
+            ${premiumBadge}
+          </div>
         </div>
         <p class="foro-description">${foro.description}</p>
         <p class="text-muted small">Creador: ${foro.creator.username}</p>
@@ -60,7 +162,7 @@ async function cargarForos() {
           <div class="d-flex btn-group-acciones">
             <button class="btn btn-primary btn-sm" onclick="verForo('${foro._id}')">Ver Foro</button>
             ${memberButtons}
-            ${deleteButton}
+            ${creatorButtons}
           </div>
         </div>
       `;
@@ -141,6 +243,34 @@ async function leaveForum(forumId) {
   } catch (err) {
     console.error(err);
     alert("Error al salir del foro");
+  }
+}
+
+async function togglePinForum(forumId) {
+  if (!token || !userId) {
+    alert("Debes iniciar sesión.");
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:8080/api/forums/${forumId}/pin`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ userId })
+    });
+
+    const data = await res.json();
+    alert(data.message);
+    if (data.status === "success") {
+      cargarForos();
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Error al fijar/desfijar el foro");
   }
 }
 

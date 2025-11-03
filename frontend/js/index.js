@@ -1,62 +1,97 @@
-const abrirModalBtn = document.getElementById("abrirModalBtn");
-const crearForoBtn = document.getElementById("crearForoBtn");
-const modal = new bootstrap.Modal(document.getElementById("modal"));
-
-abrirModalBtn.addEventListener("click", () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    Swal.fire({
-      title: 'ForoEstudio',
-      text: 'Debes iniciar sesión para crear un foro',
-      confirmButtonText: 'Aceptar'
-    }).then(() => {
-      window.location.href = "login.html";
-    });
-    return;
-  }
-  modal.show();
+document.addEventListener('DOMContentLoaded', () => {
+  cargarPostsRandom();
 });
 
-crearForoBtn.addEventListener("click", async () => {
-  const name = document.getElementById("forumName").value.trim();
-  const description = document.getElementById("forumDescription").value.trim();
-  const isPremium = document.getElementById("forumPremium").checked;
-  const creator = localStorage.getItem("userId");
-  const token = localStorage.getItem("token");
-
-  if (!name || !description) {
-    Swal.fire({ title: 'ForoEstudio', text: 'Por favor completa todos los campos', confirmButtonText: 'Aceptar' });
-    return;
-  }
-
-  if (!creator || !token) {
-    Swal.fire({ title: 'ForoEstudio', text: 'Debes iniciar sesión', confirmButtonText: 'Aceptar' }).then(() => {
-      window.location.href = "login.html";
-    });
-    return;
-  }
-
+async function cargarPostsRandom() {
   try {
-    const res = await fetch("http://localhost:8080/api/forums", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify({ name, description, isPremium, creator })
-    });
-
+    const res = await fetch("http://localhost:8080/api/posts/random?limit=10");
     const data = await res.json();
 
-    if (data.status === "success") {
-      await Swal.fire({ title: 'ForoEstudio', text: 'Foro creado exitosamente', confirmButtonText: 'Aceptar' });
-      modal.hide();
-      window.location.href = "foros.html";
+    if (data.status === "success" && data.payload.length > 0) {
+      mostrarPostsRandom(data.payload);
     } else {
-      Swal.fire({ title: 'ForoEstudio', text: data.message || 'Error al crear el foro', confirmButtonText: 'Aceptar' });
+      const postsSection = document.getElementById('randomPostsSection');
+      postsSection.innerHTML = `
+        <div class="text-center text-muted">
+          <p>No hay publicaciones disponibles aún</p>
+        </div>
+      `;
     }
   } catch (err) {
-    console.error(err);
-    Swal.fire({ title: 'ForoEstudio', text: 'Error al crear el foro. Verifica tu conexión.', confirmButtonText: 'Aceptar' });
+    console.error("Error al cargar posts random:", err);
+    const postsSection = document.getElementById('randomPostsSection');
+    if (postsSection) {
+      postsSection.innerHTML = `
+        <div class="text-center text-muted">
+          <p>Error al cargar las publicaciones</p>
+        </div>
+      `;
+    }
   }
-});
+}
+
+function mostrarPostsRandom(posts) {
+  const postsSection = document.getElementById('randomPostsSection');
+  
+  if (!postsSection) return;
+
+  postsSection.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>Publicaciones Destacadas</h2>
+      <button class="btn btn-secondary" onclick="cargarPostsRandom()">
+        Actualizar
+      </button>
+    </div>
+    <div class="row" id="postsGrid"></div>
+  `;
+
+  const postsGrid = document.getElementById('postsGrid');
+
+  posts.forEach(post => {
+    const postDate = new Date(post.createdAt).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+
+    const postCard = document.createElement('div');
+    postCard.className = 'col-md-6 col-lg-4 mb-4';
+    postCard.innerHTML = `
+      <div class="card h-100">
+        <div class="card-body d-flex flex-column">
+          <div class="mb-2">
+            <span class="badge bg-secondary">${post.forum?.name || 'Sin foro'}</span>
+          </div>
+          <h5 class="card-title">${post.title}</h5>
+          <p class="card-text text-muted flex-grow-1">
+            ${post.content.substring(0, 120)}${post.content.length > 120 ? '...' : ''}
+          </p>
+          <div class="mt-auto">
+            <hr>
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted">
+                <strong>${post.author?.username || 'Anónimo'}</strong>
+              </small>
+              <small class="text-muted">${postDate}</small>
+            </div>
+            <div class="mt-2">
+              <button class="btn btn-sm btn-secondary w-100" onclick="verPost('${post._id}', '${post.forum?._id || ''}')">
+                Ver publicación
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    postsGrid.appendChild(postCard);
+  });
+}
+
+function verPost(postId, forumId) {
+  if (forumId) {
+    window.location.href = `forum-detalle.html?id=${forumId}#post-${postId}`;
+  } else {
+    alert('Este post no tiene foro asociado');
+  }
+}
