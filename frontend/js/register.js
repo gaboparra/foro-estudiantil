@@ -23,14 +23,14 @@ form.addEventListener("submit", async (e) => {
       localStorage.setItem("username", data.payload.username);
 
       await Swal.fire({
-        title: 'ForoEstudio',
+        title: 'La cobra te dice:',
         text: 'Registro exitoso. Bienvenido ' + data.payload.username,
         confirmButtonText: 'Aceptar'
       });
       window.location.href = "index.html";
     } else {
       Swal.fire({
-        title: 'ForoEstudio',
+        title: 'La cobra te dice:',
         text: data.message || "Error al registrarse.",
         confirmButtonText: 'Aceptar'
       });
@@ -38,7 +38,7 @@ form.addEventListener("submit", async (e) => {
   } catch (err) {
     console.error("Error completo:", err);
     Swal.fire({
-      title: 'ForoEstudio',
+      title: 'La cobra te dice:',
       text: 'No se pudo registrar el usuario. Verifica que el servidor esté corriendo.',
       confirmButtonText: 'Aceptar'
     });

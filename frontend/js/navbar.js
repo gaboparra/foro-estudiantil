@@ -10,7 +10,7 @@ async function cerrarSesion() {
   localStorage.removeItem("userId");
 
   await Swal.fire({
-    title: 'ForoEstudio',
+    title: 'La cobra te dice:',
     text: 'Sesión cerrada',
     confirmButtonText: 'Aceptar'
   });

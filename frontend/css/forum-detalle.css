@@ -17,15 +17,6 @@ body {
   background-color: #f8f9fa;
 }
 
-#postsList .card {
-  transition: transform 0.2s;
-}
-
-#postsList .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
 .text-muted {
   color: #6c757d;
 }

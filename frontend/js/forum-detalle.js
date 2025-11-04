@@ -15,7 +15,11 @@ async function loadForumDetails() {
     const data = await res.json();
 
     if (data.status === "error") {
-      alert(data.message);
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: data.message,
+        confirmButtonText: 'Aceptar'
+      });
       window.location.href = "foros.html";
       return;
     }
@@ -59,7 +63,11 @@ async function loadForumDetails() {
 
   } catch (err) {
     console.error(err);
-    alert("Error al cargar el foro");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al cargar el foro',
+      confirmButtonText: 'Aceptar'
+    });
   }
 }
 
@@ -75,7 +83,11 @@ async function loadPostsSorted() {
     }
   } catch (err) {
     console.error(err);
-    alert("Error al ordenar publicaciones");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al ordenar publicaciones',
+      confirmButtonText: 'Aceptar'
+    });
   }
 }
 
@@ -216,12 +228,20 @@ async function addComment(postId) {
   const content = document.getElementById(`commentContent-${postId}`).value.trim();
 
   if (!content) {
-    alert("Por favor escribe un comentario");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Por favor escribe un comentario',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
   if (!userId || !token) {
-    alert("Debes iniciar sesión");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Debes iniciar sesión',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
@@ -244,11 +264,19 @@ async function addComment(postId) {
       document.getElementById(`commentContent-${postId}`).value = '';
       loadForumDetails();
     } else {
-      alert(data.message || "Error al crear el comentario");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: data.message || 'Error al crear el comentario',
+        confirmButtonText: 'Aceptar'
+      });
     }
   } catch (err) {
     console.error(err);
-    alert("Error al crear el comentario");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al crear el comentario',
+      confirmButtonText: 'Aceptar'
+    });
   }
 }
 
@@ -262,7 +290,11 @@ document.getElementById('saveEditCommentBtn').addEventListener('click', async ()
   const content = document.getElementById('editCommentContent').value.trim();
 
   if (!content) {
-    alert("El comentario no puede estar vacío");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'El comentario no puede estar vacío',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
@@ -279,20 +311,41 @@ document.getElementById('saveEditCommentBtn').addEventListener('click', async ()
     const data = await res.json();
 
     if (data.status === "success") {
-      alert("Comentario actualizado exitosamente");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: 'Comentario actualizado exitosamente',
+        confirmButtonText: 'Aceptar'
+      });
       editCommentModal.hide();
       loadForumDetails();
     } else {
-      alert(data.message || "Error al actualizar el comentario");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: data.message || 'Error al actualizar el comentario',
+        confirmButtonText: 'Aceptar'
+      });
     }
   } catch (err) {
     console.error(err);
-    alert("Error al actualizar el comentario");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al actualizar el comentario',
+      confirmButtonText: 'Aceptar'
+    });
   }
 });
 
 async function deleteComment(commentId, postId) {
-  if (!confirm("¿Estás seguro de que quieres eliminar este comentario?")) {
+  const result = await Swal.fire({
+    title: 'La cobra te dice:',
+    text: '¿Estás seguro de que quieres eliminar este comentario?',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#d33'
+  });
+
+  if (!result.isConfirmed) {
     return;
   }
 
@@ -308,14 +361,26 @@ async function deleteComment(commentId, postId) {
     const data = await res.json();
 
     if (data.status === "success") {
-      alert("Comentario eliminado exitosamente");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: 'Comentario eliminado exitosamente',
+        confirmButtonText: 'Aceptar'
+      });
       loadForumDetails();
     } else {
-      alert(data.message || "Error al eliminar el comentario");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: data.message || 'Error al eliminar el comentario',
+        confirmButtonText: 'Aceptar'
+      });
     }
   } catch (err) {
     console.error(err);
-    alert("Error al eliminar el comentario");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al eliminar el comentario',
+      confirmButtonText: 'Aceptar'
+    });
   }
 }
 
@@ -326,12 +391,20 @@ document.getElementById('createPostForm').addEventListener('submit', async (e) =
   const content = document.getElementById('postContent').value.trim();
 
   if (!title || !content) {
-    alert("Por favor completa todos los campos");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Por favor completa todos los campos',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
   if (!userId || !token) {
-    alert("Debes iniciar sesión");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Debes iniciar sesión',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
@@ -353,16 +426,28 @@ document.getElementById('createPostForm').addEventListener('submit', async (e) =
     const data = await res.json();
 
     if (data.status === "success") {
-      alert("Publicación creada exitosamente");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: 'Publicación creada exitosamente',
+        confirmButtonText: 'Aceptar'
+      });
       document.getElementById('postTitle').value = '';
       document.getElementById('postContent').value = '';
       loadForumDetails();
     } else {
-      alert(data.message || "Error al crear la publicación");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: data.message || 'Error al crear la publicación',
+        confirmButtonText: 'Aceptar'
+      });
     }
   } catch (err) {
     console.error(err);
-    alert("Error al crear la publicación");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al crear la publicación',
+      confirmButtonText: 'Aceptar'
+    });
   }
 });
 
@@ -378,7 +463,11 @@ document.getElementById('saveEditBtn').addEventListener('click', async () => {
   const content = document.getElementById('editPostContent').value.trim();
 
   if (!title || !content) {
-    alert("Por favor completa todos los campos");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Por favor completa todos los campos',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
@@ -399,20 +488,41 @@ document.getElementById('saveEditBtn').addEventListener('click', async () => {
     const data = await res.json();
 
     if (data.status === "success") {
-      alert("Publicación actualizada exitosamente");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: 'Publicación actualizada exitosamente',
+        confirmButtonText: 'Aceptar'
+      });
       editModal.hide();
       loadForumDetails();
     } else {
-      alert(data.message || "Error al actualizar la publicación");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: data.message || 'Error al actualizar la publicación',
+        confirmButtonText: 'Aceptar'
+      });
     }
   } catch (err) {
     console.error(err);
-    alert("Error al actualizar la publicación");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al actualizar la publicación',
+      confirmButtonText: 'Aceptar'
+    });
   }
 });
 
 async function deletePost(postId) {
-  if (!confirm("¿Estás seguro de que quieres eliminar esta publicación?")) {
+  const result = await Swal.fire({
+    title: 'La cobra te dice:',
+    text: '¿Estás seguro de que quieres eliminar esta publicación?',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#d33'
+  });
+
+  if (!result.isConfirmed) {
     return;
   }
 
@@ -429,19 +539,40 @@ async function deletePost(postId) {
     const data = await res.json();
 
     if (data.status === "success") {
-      alert("Publicación eliminada exitosamente");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: 'Publicación eliminada exitosamente',
+        confirmButtonText: 'Aceptar'
+      });
       loadForumDetails();
     } else {
-      alert(data.message || "Error al eliminar la publicación");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: data.message || 'Error al eliminar la publicación',
+        confirmButtonText: 'Aceptar'
+      });
     }
   } catch (err) {
     console.error(err);
-    alert("Error al eliminar la publicación");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al eliminar la publicación',
+      confirmButtonText: 'Aceptar'
+    });
   }
 }
 
 async function deleteForum() {
-  if (!confirm("¿Estás seguro de que quieres eliminar este foro? Esta acción no se puede deshacer.")) {
+  const result = await Swal.fire({
+    title: 'La cobra te dice:',
+    text: '¿Estás seguro de que quieres eliminar este foro? Esta acción no se puede deshacer.',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#d33'
+  });
+
+  if (!result.isConfirmed) {
     return;
   }
 
@@ -458,14 +589,26 @@ async function deleteForum() {
     const data = await res.json();
 
     if (data.status === "success") {
-      alert("Foro eliminado exitosamente");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: 'Foro eliminado exitosamente',
+        confirmButtonText: 'Aceptar'
+      });
       window.location.href = "foros.html";
     } else {
-      alert(data.message || "Error al eliminar el foro");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: data.message || 'Error al eliminar el foro',
+        confirmButtonText: 'Aceptar'
+      });
     }
   } catch (err) {
     console.error(err);
-    alert("Error al eliminar el foro");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al eliminar el foro',
+      confirmButtonText: 'Aceptar'
+    });
   }
 }
 

@@ -92,6 +92,10 @@ function verPost(postId, forumId) {
   if (forumId) {
     window.location.href = `forum-detalle.html?id=${forumId}#post-${postId}`;
   } else {
-    alert('Este post no tiene foro asociado');
+    Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Este post no tiene foro asociado',
+      confirmButtonText: 'Aceptar'
+    });
   }
 }

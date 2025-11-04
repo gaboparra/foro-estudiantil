@@ -2,8 +2,13 @@ const token = localStorage.getItem("token");
 const userId = localStorage.getItem("userId");
 
 if (!token || !userId) {
-  alert("Debes iniciar sesión para ver tu perfil.");
-  window.location.href = "login.html";
+  Swal.fire({
+    title: 'La cobra te dice:',
+    text: 'Debes iniciar sesión para ver tu perfil',
+    confirmButtonText: 'Aceptar'
+  }).then(() => {
+    window.location.href = "login.html";
+  });
 }
 
 let currentUser = null;
@@ -19,7 +24,11 @@ async function cargarPerfil() {
     const data = await res.json();
 
     if (data.status === "error") {
-      alert(data.message);
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: data.message,
+        confirmButtonText: 'Aceptar'
+      });
       return;
     }
 
@@ -33,7 +42,11 @@ async function cargarPerfil() {
 
   } catch (err) {
     console.error(err);
-    alert("Error al cargar el perfil");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al cargar el perfil',
+      confirmButtonText: 'Aceptar'
+    });
   }
 }
 
@@ -62,7 +75,11 @@ document.getElementById("editProfileForm").addEventListener("submit", async (e) 
   const bio = document.getElementById("editBio").value.trim();
 
   if (!username || !email) {
-    alert("El nombre de usuario y email son obligatorios");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'El nombre de usuario y email son obligatorios',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
@@ -79,8 +96,12 @@ document.getElementById("editProfileForm").addEventListener("submit", async (e) 
     const data = await res.json();
 
     if (data.status === "success") {
-      alert("Perfil actualizado exitosamente");
-
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: 'Perfil actualizado exitosamente',
+        confirmButtonText: 'Aceptar'
+      });
+      
       if (username !== currentUser.username) {
         localStorage.setItem("username", username);
       }
@@ -88,11 +109,19 @@ document.getElementById("editProfileForm").addEventListener("submit", async (e) 
       await cargarPerfil();
       toggleEditMode();
     } else {
-      alert(data.message || "Error al actualizar el perfil");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: data.message || 'Error al actualizar el perfil',
+        confirmButtonText: 'Aceptar'
+      });
     }
   } catch (err) {
     console.error(err);
-    alert("Error al actualizar el perfil");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al actualizar el perfil',
+      confirmButtonText: 'Aceptar'
+    });
   }
 });
 
@@ -183,22 +212,38 @@ document.getElementById("changePasswordForm").addEventListener("submit", async (
   const confirmPassword = document.getElementById("confirmPassword").value.trim();
 
   if (!currentPassword || !newPassword || !confirmPassword) {
-    Swal.fire("Todos los campos son obligatorios");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Todos los campos son obligatorios',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
   if (newPassword.length < 6) {
-    Swal.fire("La nueva contraseña debe tener al menos 6 caracteres");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'La nueva contraseña debe tener al menos 6 caracteres',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
   if (newPassword !== confirmPassword) {
-    Swal.fire("Las contraseñas no coinciden");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Las contraseñas no coinciden',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
   if (currentPassword === newPassword) {
-    Swal.fire("La nueva contraseña debe ser diferente a la actual");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'La nueva contraseña debe ser diferente a la actual',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
@@ -218,14 +263,26 @@ document.getElementById("changePasswordForm").addEventListener("submit", async (
     const data = await res.json();
 
     if (data.status === "success") {
-      Swal.fire("Contraseña actualizada exitosamente");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: 'Contraseña actualizada exitosamente',
+        confirmButtonText: 'Aceptar'
+      });
       resetPasswordForm();
     } else {
-      Swal.fire(data.message || "Error al cambiar la contraseña");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: data.message || 'Error al cambiar la contraseña',
+        confirmButtonText: 'Aceptar'
+      });
     }
   } catch (err) {
     console.error(err);
-    Swal.fire("Error al cambiar la contraseña");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al cambiar la contraseña',
+      confirmButtonText: 'Aceptar'
+    });
   }
 });
 
