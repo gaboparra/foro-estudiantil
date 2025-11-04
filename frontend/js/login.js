@@ -19,14 +19,14 @@ form.addEventListener("submit", async (e) => {
       localStorage.setItem("userId", data.payload.user._id);
 
       await Swal.fire({
-        title: 'ForoEstudio',
+        title: 'La cobra te dice:',
         text: 'Inicio de sesión exitoso.',
         confirmButtonText: 'Aceptar'
       });
       window.location.href = "./index.html";
     } else {
       Swal.fire({
-        title: 'ForoEstudio',
+        title: 'La cobra te dice:',
         text: data.message || "Error al iniciar sesión.",
         confirmButtonText: 'Aceptar'
       });
@@ -34,7 +34,7 @@ form.addEventListener("submit", async (e) => {
   } catch (err) {
     console.error(err);
     Swal.fire({
-      title: 'ForoEstudio',
+      title: 'La cobra te dice:',
       text: 'No se pudo iniciar sesión.',
       confirmButtonText: 'Aceptar'
     });

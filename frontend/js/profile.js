@@ -2,8 +2,13 @@ const token = localStorage.getItem("token");
 const userId = localStorage.getItem("userId");
 
 if (!token || !userId) {
-  alert("Debes iniciar sesión para ver tu perfil.");
-  window.location.href = "login.html";
+  Swal.fire({
+    title: 'La cobra te dice:',
+    text: 'Debes iniciar sesión para ver tu perfil',
+    confirmButtonText: 'Aceptar'
+  }).then(() => {
+    window.location.href = "login.html";
+  });
 }
 
 let currentUser = null;
@@ -19,7 +24,11 @@ async function cargarPerfil() {
     const data = await res.json();
 
     if (data.status === "error") {
-      alert(data.message);
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: data.message,
+        confirmButtonText: 'Aceptar'
+      });
       return;
     }
 
@@ -33,7 +42,11 @@ async function cargarPerfil() {
 
   } catch (err) {
     console.error(err);
-    alert("Error al cargar el perfil");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al cargar el perfil',
+      confirmButtonText: 'Aceptar'
+    });
   }
 }
 
@@ -42,11 +55,9 @@ function toggleEditMode() {
   const editMode = document.getElementById("editMode");
 
   if (viewMode.style.display === "none") {
-    // Volver a vista
     viewMode.style.display = "block";
     editMode.style.display = "none";
   } else {
-    // Cambiar a edición
     document.getElementById("editUsername").value = currentUser.username;
     document.getElementById("editEmail").value = currentUser.email;
     document.getElementById("editBio").value = currentUser.bio || "";
@@ -64,7 +75,11 @@ document.getElementById("editProfileForm").addEventListener("submit", async (e) 
   const bio = document.getElementById("editBio").value.trim();
 
   if (!username || !email) {
-    alert("El nombre de usuario y email son obligatorios");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'El nombre de usuario y email son obligatorios',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
@@ -81,22 +96,32 @@ document.getElementById("editProfileForm").addEventListener("submit", async (e) 
     const data = await res.json();
 
     if (data.status === "success") {
-      alert("Perfil actualizado exitosamente");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: 'Perfil actualizado exitosamente',
+        confirmButtonText: 'Aceptar'
+      });
       
-      // Actualizar localStorage si cambió el username
       if (username !== currentUser.username) {
         localStorage.setItem("username", username);
       }
 
-      // Recargar perfil
       await cargarPerfil();
       toggleEditMode();
     } else {
-      alert(data.message || "Error al actualizar el perfil");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: data.message || 'Error al actualizar el perfil',
+        confirmButtonText: 'Aceptar'
+      });
     }
   } catch (err) {
     console.error(err);
-    alert("Error al actualizar el perfil");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al actualizar el perfil',
+      confirmButtonText: 'Aceptar'
+    });
   }
 });
 
@@ -136,7 +161,7 @@ async function cargarMisForos() {
             <h5>${foro.name}${premiumBadge}</h5>
             <p class="text-muted mb-0">${foro.description}</p>
           </div>
-          <button class="btn btn-sm btn-primary" onclick="window.location.href='foros-detalle.html?id=${foro._id}'">Ver</button>
+          <button class="btn btn-sm btn-primary" onclick="window.location.href='forum-detalle.html?id=${foro._id}'">Ver</button>
         </div>
       `;
 
@@ -175,12 +200,10 @@ function cargarMisPosts(posts) {
   });
 }
 
-// Función para resetear el formulario de contraseña
 function resetPasswordForm() {
   document.getElementById("changePasswordForm").reset();
 }
 
-// Event listener para el formulario de cambio de contraseña
 document.getElementById("changePasswordForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -188,27 +211,39 @@ document.getElementById("changePasswordForm").addEventListener("submit", async (
   const newPassword = document.getElementById("newPassword").value.trim();
   const confirmPassword = document.getElementById("confirmPassword").value.trim();
 
-  // Validar que las contraseñas no estén vacías
   if (!currentPassword || !newPassword || !confirmPassword) {
-    Swal.fire("Todos los campos son obligatorios");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Todos los campos son obligatorios',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
-  // Validar longitud mínima
   if (newPassword.length < 6) {
-    Swal.fire("La nueva contraseña debe tener al menos 6 caracteres");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'La nueva contraseña debe tener al menos 6 caracteres',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
-  // Validar que las nuevas contraseñas coincidan
   if (newPassword !== confirmPassword) {
-    Swal.fire("Las contraseñas no coinciden");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Las contraseñas no coinciden',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
-  // Validar que la nueva contraseña sea diferente a la actual
   if (currentPassword === newPassword) {
-    Swal.fire("La nueva contraseña debe ser diferente a la actual");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'La nueva contraseña debe ser diferente a la actual',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
@@ -228,14 +263,26 @@ document.getElementById("changePasswordForm").addEventListener("submit", async (
     const data = await res.json();
 
     if (data.status === "success") {
-      Swal.fire("Contraseña actualizada exitosamente");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: 'Contraseña actualizada exitosamente',
+        confirmButtonText: 'Aceptar'
+      });
       resetPasswordForm();
     } else {
-      Swal.fire(data.message || "Error al cambiar la contraseña");
+      await Swal.fire({
+        title: 'La cobra te dice:',
+        text: data.message || 'Error al cambiar la contraseña',
+        confirmButtonText: 'Aceptar'
+      });
     }
   } catch (err) {
     console.error(err);
-    Swal.fire("Error al cambiar la contraseña");
+    await Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al cambiar la contraseña',
+      confirmButtonText: 'Aceptar'
+    });
   }
 });
 

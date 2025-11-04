@@ -9,7 +9,7 @@ const modal = new bootstrap.Modal(document.getElementById("modal"));
 abrirModalBtn.addEventListener("click", () => {
   if (!token) {
     Swal.fire({
-      title: 'ForoEstudio',
+      title: 'La cobra te dice:',
       text: 'Debes iniciar sesión para crear un foro',
       confirmButtonText: 'Aceptar'
     }).then(() => {
@@ -29,7 +29,7 @@ crearForoBtn.addEventListener("click", async () => {
 
   if (!name || !description) {
     Swal.fire({ 
-      title: 'ForoEstudio', 
+      title: 'La cobra te dice:', 
       text: 'Por favor completa todos los campos', 
       confirmButtonText: 'Aceptar' 
     });
@@ -38,7 +38,7 @@ crearForoBtn.addEventListener("click", async () => {
 
   if (!creator || !token) {
     Swal.fire({ 
-      title: 'ForoEstudio', 
+      title: 'La cobra te dice:', 
       text: 'Debes iniciar sesión', 
       confirmButtonText: 'Aceptar' 
     }).then(() => {
@@ -61,7 +61,7 @@ crearForoBtn.addEventListener("click", async () => {
 
     if (data.status === "success") {
       await Swal.fire({ 
-        title: 'ForoEstudio', 
+        title: 'La cobra te dice:', 
         text: 'Foro creado exitosamente', 
         confirmButtonText: 'Aceptar' 
       });
@@ -74,7 +74,7 @@ crearForoBtn.addEventListener("click", async () => {
       cargarForos();
     } else {
       Swal.fire({ 
-        title: 'ForoEstudio', 
+        title: 'La cobra te dice:', 
         text: data.message || 'Error al crear el foro', 
         confirmButtonText: 'Aceptar' 
       });
@@ -82,7 +82,7 @@ crearForoBtn.addEventListener("click", async () => {
   } catch (err) {
     console.error(err);
     Swal.fire({ 
-      title: 'ForoEstudio', 
+      title: 'La cobra te dice:', 
       text: 'Error al crear el foro. Verifica tu conexión.', 
       confirmButtonText: 'Aceptar' 
     });
@@ -187,8 +187,13 @@ function verForo(forumId) {
 
 async function joinForum(forumId) {
   if (!token || !userId) {
-    alert("Debes iniciar sesión.");
-    window.location.href = "login.html";
+    Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Debes iniciar sesión',
+      confirmButtonText: 'Aceptar'
+    }).then(() => {
+      window.location.href = "login.html";
+    });
     return;
   }
 
@@ -203,24 +208,46 @@ async function joinForum(forumId) {
     });
 
     const data = await res.json();
-    alert(data.message);
+    
+    Swal.fire({
+      title: 'La cobra te dice:',
+      text: data.message,
+      confirmButtonText: 'Aceptar'
+    });
+    
     if (data.status === "success") {
       cargarForos();
     }
 
   } catch (err) {
     console.error(err);
-    alert("Error al unirse al foro");
+    Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al unirse al foro',
+      confirmButtonText: 'Aceptar'
+    });
   }
 }
 
 async function leaveForum(forumId) {
   if (!token || !userId) {
-    alert("Debes iniciar sesión.");
+    Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Debes iniciar sesión',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
-  if (!confirm("¿Estás seguro de que quieres salir de este foro?")) {
+  const result = await Swal.fire({
+    title: 'La cobra te dice:',
+    text: '¿Estás seguro de que quieres salir de este foro?',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, salir',
+    cancelButtonText: 'Cancelar'
+  });
+
+  if (!result.isConfirmed) {
     return;
   }
 
@@ -235,20 +262,34 @@ async function leaveForum(forumId) {
     });
 
     const data = await res.json();
-    alert(data.message);
+    
+    Swal.fire({
+      title: 'La cobra te dice:',
+      text: data.message,
+      confirmButtonText: 'Aceptar'
+    });
+    
     if (data.status === "success") {
       cargarForos();
     }
 
   } catch (err) {
     console.error(err);
-    alert("Error al salir del foro");
+    Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al salir del foro',
+      confirmButtonText: 'Aceptar'
+    });
   }
 }
 
 async function togglePinForum(forumId) {
   if (!token || !userId) {
-    alert("Debes iniciar sesión.");
+    Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Debes iniciar sesión',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
@@ -263,24 +304,47 @@ async function togglePinForum(forumId) {
     });
 
     const data = await res.json();
-    alert(data.message);
+    
+    Swal.fire({
+      title: 'La cobra te dice:',
+      text: data.message,
+      confirmButtonText: 'Aceptar'
+    });
+    
     if (data.status === "success") {
       cargarForos();
     }
 
   } catch (err) {
     console.error(err);
-    alert("Error al fijar/desfijar el foro");
+    Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al fijar/desfijar el foro',
+      confirmButtonText: 'Aceptar'
+    });
   }
 }
 
 async function deleteForum(forumId) {
   if (!token || !userId) {
-    alert("Debes iniciar sesión.");
+    Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Debes iniciar sesión',
+      confirmButtonText: 'Aceptar'
+    });
     return;
   }
 
-  if (!confirm("¿Estás seguro de que quieres eliminar este foro? Esta acción no se puede deshacer y eliminará todas las publicaciones.")) {
+  const result = await Swal.fire({
+    title: 'La cobra te dice:',
+    text: '¿Estás seguro de que quieres eliminar este foro? Esta acción no se puede deshacer y eliminará todas las publicaciones.',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#d33'
+  });
+
+  if (!result.isConfirmed) {
     return;
   }
 
@@ -295,14 +359,24 @@ async function deleteForum(forumId) {
     });
 
     const data = await res.json();
-    alert(data.message);
+    
+    Swal.fire({
+      title: 'La cobra te dice:',
+      text: data.message,
+      confirmButtonText: 'Aceptar'
+    });
+    
     if (data.status === "success") {
       cargarForos();
     }
 
   } catch (err) {
     console.error(err);
-    alert("Error al eliminar el foro");
+    Swal.fire({
+      title: 'La cobra te dice:',
+      text: 'Error al eliminar el foro',
+      confirmButtonText: 'Aceptar'
+    });
   }
 }
 
