@@ -66,11 +66,11 @@ crearForoBtn.addEventListener("click", async () => {
         confirmButtonText: 'Aceptar' 
       });
       modal.hide();
-
+      
       document.getElementById("forumName").value = '';
       document.getElementById("forumDescription").value = '';
       document.getElementById("forumPremium").checked = false;
-
+      
       cargarForos();
     } else {
       Swal.fire({ 
@@ -91,7 +91,11 @@ crearForoBtn.addEventListener("click", async () => {
 
 async function cargarForos() {
   try {
-    const res = await fetch("http://localhost:8080/api/forums");
+    const url = userId 
+      ? `http://localhost:8080/api/forums?userId=${userId}`
+      : "http://localhost:8080/api/forums";
+    
+    const res = await fetch(url);
     const data = await res.json();
 
     if (data.status === "error") {
@@ -115,14 +119,14 @@ async function cargarForos() {
     foros.forEach(foro => {
       const foroDiv = document.createElement("div");
       foroDiv.classList.add("foro-card");
-
+      
       if (foro.isPinned) {
         foroDiv.classList.add("foro-pinned");
       }
 
       const premiumBadge = foro.isPremium ? '<span class="badge-premium">Premium</span>' : '';
       const pinnedBadge = foro.isPinned ? '<span class="badge-pinned">Fijado</span>' : '';
-
+      
       const isCreator = foro.creator._id === userId;
       const isMember = foro.members.some(member => member._id === userId);
 
@@ -188,9 +192,9 @@ function verForo(forumId) {
 async function joinForum(forumId) {
   if (!token || !userId) {
     Swal.fire({
-      title: 'La cobra te dice:',
-      text: 'Debes iniciar sesión',
-      confirmButtonText: 'Aceptar'
+      title: "La cobra te dice:",
+      text: "Debes iniciar sesión.",
+      confirmButtonText: "Aceptar"
     }).then(() => {
       window.location.href = "login.html";
     });
@@ -208,23 +212,21 @@ async function joinForum(forumId) {
     });
 
     const data = await res.json();
-    
-    Swal.fire({
-      title: 'La cobra te dice:',
+
+    await Swal.fire({
+      title: "La cobra te dice:",
       text: data.message,
-      confirmButtonText: 'Aceptar'
+      confirmButtonText: "Aceptar"
     });
-    
-    if (data.status === "success") {
-      cargarForos();
-    }
+
+    if (data.status === "success") cargarForos();
 
   } catch (err) {
     console.error(err);
     Swal.fire({
-      title: 'La cobra te dice:',
-      text: 'Error al unirse al foro',
-      confirmButtonText: 'Aceptar'
+      title: "La cobra te dice:",
+      text: "Error al unirse al foro",
+      confirmButtonText: "Aceptar"
     });
   }
 }
@@ -232,24 +234,22 @@ async function joinForum(forumId) {
 async function leaveForum(forumId) {
   if (!token || !userId) {
     Swal.fire({
-      title: 'La cobra te dice:',
-      text: 'Debes iniciar sesión',
-      confirmButtonText: 'Aceptar'
+      title: "La cobra te dice:",
+      text: "Debes iniciar sesión.",
+      confirmButtonText: "Aceptar"
     });
     return;
   }
 
-  const result = await Swal.fire({
-    title: 'La cobra te dice:',
-    text: '¿Estás seguro de que quieres salir de este foro?',
+  const confirmResult = await Swal.fire({
+    title: "La cobra te dice:",
+    text: "¿Estás seguro de que quieres salir de este foro?",
     showCancelButton: true,
-    confirmButtonText: 'Sí, salir',
-    cancelButtonText: 'Cancelar'
+    confirmButtonText: "Sí",
+    cancelButtonText: "No"
   });
 
-  if (!result.isConfirmed) {
-    return;
-  }
+  if (!confirmResult.isConfirmed) return;
 
   try {
     const res = await fetch(`http://localhost:8080/api/forums/${forumId}/leave`, {
@@ -262,23 +262,21 @@ async function leaveForum(forumId) {
     });
 
     const data = await res.json();
-    
-    Swal.fire({
-      title: 'La cobra te dice:',
+
+    await Swal.fire({
+      title: "La cobra te dice:",
       text: data.message,
-      confirmButtonText: 'Aceptar'
+      confirmButtonText: "Aceptar"
     });
-    
-    if (data.status === "success") {
-      cargarForos();
-    }
+
+    if (data.status === "success") cargarForos();
 
   } catch (err) {
     console.error(err);
     Swal.fire({
-      title: 'La cobra te dice:',
-      text: 'Error al salir del foro',
-      confirmButtonText: 'Aceptar'
+      title: "La cobra te dice:",
+      text: "Error al salir del foro",
+      confirmButtonText: "Aceptar"
     });
   }
 }
@@ -286,9 +284,9 @@ async function leaveForum(forumId) {
 async function togglePinForum(forumId) {
   if (!token || !userId) {
     Swal.fire({
-      title: 'La cobra te dice:',
-      text: 'Debes iniciar sesión',
-      confirmButtonText: 'Aceptar'
+      title: "La cobra te dice:",
+      text: "Debes iniciar sesión.",
+      confirmButtonText: "Aceptar"
     });
     return;
   }
@@ -304,23 +302,21 @@ async function togglePinForum(forumId) {
     });
 
     const data = await res.json();
-    
-    Swal.fire({
-      title: 'La cobra te dice:',
-      text: data.message,
-      confirmButtonText: 'Aceptar'
+
+    await Swal.fire({
+      title: "La cobra te dice:",
+      text: "Foro fijado/desfijado correctamente",
+      confirmButtonText: "Aceptar"
     });
-    
-    if (data.status === "success") {
-      cargarForos();
-    }
+
+    if (data.status === "success") cargarForos();
 
   } catch (err) {
     console.error(err);
     Swal.fire({
-      title: 'La cobra te dice:',
-      text: 'Error al fijar/desfijar el foro',
-      confirmButtonText: 'Aceptar'
+      title: "La cobra te dice:",
+      text: "Error al fijar/desfijar el foro",
+      confirmButtonText: "Aceptar"
     });
   }
 }
@@ -328,25 +324,22 @@ async function togglePinForum(forumId) {
 async function deleteForum(forumId) {
   if (!token || !userId) {
     Swal.fire({
-      title: 'La cobra te dice:',
-      text: 'Debes iniciar sesión',
-      confirmButtonText: 'Aceptar'
+      title: "La cobra te dice:",
+      text: "Debes iniciar sesión.",
+      confirmButtonText: "Aceptar"
     });
     return;
   }
 
-  const result = await Swal.fire({
-    title: 'La cobra te dice:',
-    text: '¿Estás seguro de que quieres eliminar este foro? Esta acción no se puede deshacer y eliminará todas las publicaciones.',
+  const confirmResult = await Swal.fire({
+    title: "La cobra te dice:",
+    text: "¿Estás seguro de que quieres eliminar este foro? Esta acción no se puede deshacer.",
     showCancelButton: true,
-    confirmButtonText: 'Sí, eliminar',
-    cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#d33'
+    confirmButtonText: "Eliminar",
+    cancelButtonText: "Cancelar"
   });
 
-  if (!result.isConfirmed) {
-    return;
-  }
+  if (!confirmResult.isConfirmed) return;
 
   try {
     const res = await fetch(`http://localhost:8080/api/forums/${forumId}`, {
@@ -359,23 +352,21 @@ async function deleteForum(forumId) {
     });
 
     const data = await res.json();
-    
-    Swal.fire({
-      title: 'La cobra te dice:',
+
+    await Swal.fire({
+      title: "La cobra te dice:",
       text: data.message,
-      confirmButtonText: 'Aceptar'
+      confirmButtonText: "Aceptar"
     });
-    
-    if (data.status === "success") {
-      cargarForos();
-    }
+
+    if (data.status === "success") cargarForos();
 
   } catch (err) {
     console.error(err);
     Swal.fire({
-      title: 'La cobra te dice:',
-      text: 'Error al eliminar el foro',
-      confirmButtonText: 'Aceptar'
+      title: "La cobra te dice:",
+      text: "Error al eliminar el foro",
+      confirmButtonText: "Aceptar"
     });
   }
 }

@@ -25,6 +25,13 @@ const userSchema = new mongoose.Schema(
         ref: "Forum",
       },
     ],
+
+    pinnedForums: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Forum",
+      },
+    ],
   },
   { timestamps: true }
 );
