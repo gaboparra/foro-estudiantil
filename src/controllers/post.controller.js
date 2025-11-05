@@ -95,7 +95,7 @@ export const getPosts = async (req, res) => {
 
 export const getPostsSortedByDate = async (req, res) => {
   try {
-    const { order } = req.query; 
+    const { order } = req.query; // 'asc' o 'desc' (default: desc)
     const sortOrder = order === "asc" ? 1 : -1;
 
     const posts = await Post.find()
@@ -125,7 +125,7 @@ export const getPostsSortedByDate = async (req, res) => {
 export const getForumPostsSortedByDate = async (req, res) => {
   try {
     const { forumId } = req.params;
-    const { order } = req.query; 
+    const { order } = req.query; // 'asc' o 'desc' (default: desc)
     const sortOrder = order === "asc" ? 1 : -1;
 
     const posts = await Post.find({ forum: forumId })
@@ -268,6 +268,36 @@ export const deletePost = async (req, res) => {
     res.status(500).json({
       status: "error",
       message: "Error deleting post",
+      error: error.message,
+    });
+  }
+};
+
+export const getRandomPosts = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+
+    const posts = await Post.aggregate([{ $sample: { size: limit } }]);
+
+    const populatedPosts = await Post.populate(posts, [
+      { path: "author", select: "username email" },
+      { path: "forum", select: "name" },
+      {
+        path: "comments",
+        populate: { path: "author", select: "username email" },
+      },
+    ]);
+
+    res.json({
+      status: "success",
+      message: "Random posts fetched successfully",
+      payload: populatedPosts,
+    });
+  } catch (error) {
+    logger.error("Error fetching random posts:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Error fetching random posts",
       error: error.message,
     });
   }

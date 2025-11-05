@@ -53,7 +53,7 @@ export const createForum = async (req, res) => {
 export const getForums = async (req, res) => {
   try {
     const forums = await Forum.find()
-      .sort({ isPinned: -1, createdAt: -1 }) 
+      .sort({ isPinned: -1, createdAt: -1 })
       .populate("creator", "username email")
       .populate({
         path: "posts",
@@ -314,38 +314,6 @@ export const deleteForum = async (req, res) => {
   }
 };
 
-export const getRandomPosts = async (req, res) => {
-  try {
-    const limit = parseInt(req.query.limit) || 10;
-    
-    const posts = await Post.aggregate([
-      { $sample: { size: limit } }
-    ]);
-
-    const populatedPosts = await Post.populate(posts, [
-      { path: 'author', select: 'username email' },
-      { path: 'forum', select: 'name' },
-      { 
-        path: 'comments',
-        populate: { path: 'author', select: 'username email' }
-      }
-    ]);
-
-    res.json({
-      status: "success",
-      message: "Random posts fetched successfully",
-      payload: populatedPosts,
-    });
-  } catch (error) {
-    logger.error("Error fetching random posts:", error);
-    res.status(500).json({
-      status: "error",
-      message: "Error fetching random posts",
-      error: error.message,
-    });
-  }
-};
-
 export const togglePinForum = async (req, res) => {
   try {
     const { userId } = req.body;
@@ -370,7 +338,7 @@ export const togglePinForum = async (req, res) => {
 
     res.json({
       status: "success",
-      message: `Forum ${forum.isPinned ? 'pinned' : 'unpinned'} successfully`,
+      message: `Forum ${forum.isPinned ? "pinned" : "unpinned"} successfully`,
       payload: {
         _id: forum._id,
         name: forum.name,

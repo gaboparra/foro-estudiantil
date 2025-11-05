@@ -32,7 +32,7 @@ async function cargarPostsRandom() {
 
 function mostrarPostsRandom(posts) {
   const postsSection = document.getElementById('randomPostsSection');
-  
+
   if (!postsSection) return;
 
   postsSection.innerHTML = `

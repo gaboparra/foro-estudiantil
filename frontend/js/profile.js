@@ -61,7 +61,7 @@ function toggleEditMode() {
     document.getElementById("editUsername").value = currentUser.username;
     document.getElementById("editEmail").value = currentUser.email;
     document.getElementById("editBio").value = currentUser.bio || "";
-    
+
     viewMode.style.display = "none";
     editMode.style.display = "block";
   }

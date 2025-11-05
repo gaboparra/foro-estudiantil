@@ -66,11 +66,11 @@ crearForoBtn.addEventListener("click", async () => {
         confirmButtonText: 'Aceptar' 
       });
       modal.hide();
-      
+
       document.getElementById("forumName").value = '';
       document.getElementById("forumDescription").value = '';
       document.getElementById("forumPremium").checked = false;
-      
+
       cargarForos();
     } else {
       Swal.fire({ 
@@ -115,14 +115,14 @@ async function cargarForos() {
     foros.forEach(foro => {
       const foroDiv = document.createElement("div");
       foroDiv.classList.add("foro-card");
-      
+
       if (foro.isPinned) {
         foroDiv.classList.add("foro-pinned");
       }
 
       const premiumBadge = foro.isPremium ? '<span class="badge-premium">Premium</span>' : '';
       const pinnedBadge = foro.isPinned ? '<span class="badge-pinned">Fijado</span>' : '';
-      
+
       const isCreator = foro.creator._id === userId;
       const isMember = foro.members.some(member => member._id === userId);
 

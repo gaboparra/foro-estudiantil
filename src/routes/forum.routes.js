@@ -6,7 +6,7 @@ import {
   joinForum,
   leaveForum,
   deleteForum,
-  togglePinForum, 
+  togglePinForum,
 } from "../controllers/forum.controller.js";
 
 const router = Router();
@@ -17,6 +17,7 @@ router.get("/:id", getForumById);
 router.post("/:id/join", joinForum);
 router.post("/:id/leave", leaveForum);
 router.delete("/:id", deleteForum);
-router.put("/:id/pin", togglePinForum); 
+
+router.put("/:id/pin", togglePinForum);
 
 export default router;
