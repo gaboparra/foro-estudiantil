@@ -27,7 +27,7 @@ form.addEventListener("submit", async (e) => {
     } else {
       Swal.fire({
         title: "La cobra te dice:",
-        text: data.message || "Error al iniciar sesión.",
+        text: "Error al iniciar sesión.",
         confirmButtonText: "Aceptar",
       });
     }

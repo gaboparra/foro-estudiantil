@@ -75,7 +75,7 @@ crearForoBtn.addEventListener("click", async () => {
     } else {
       Swal.fire({
         title: 'La cobra te dice:',
-        text: data.message || 'Error al crear el foro',
+        text: 'Error al crear el foro',
         confirmButtonText: 'Aceptar'
       });
     }
@@ -215,7 +215,7 @@ async function joinForum(forumId) {
 
     await Swal.fire({
       title: "La cobra te dice:",
-      text: data.message,
+      text: "Te has unido al foro correctamente",
       confirmButtonText: "Aceptar"
     });
 
@@ -265,7 +265,7 @@ async function leaveForum(forumId) {
 
     await Swal.fire({
       title: "La cobra te dice:",
-      text: data.message,
+      text: "Te has salido del foro correctamente",
       confirmButtonText: "Aceptar"
     });
 
@@ -355,7 +355,7 @@ async function deleteForum(forumId) {
 
     await Swal.fire({
       title: "La cobra te dice:",
-      text: data.message,
+      text: "Has eliminado el foro correctamente",
       confirmButtonText: "Aceptar"
     });
 

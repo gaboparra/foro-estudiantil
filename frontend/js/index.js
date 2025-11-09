@@ -60,13 +60,15 @@ function mostrarPostsRandom(posts) {
       <div class="card h-100">
         <div class="card-body d-flex flex-column">
           <div class="mb-2">
-            <span class="badge bg-secondary">${post.forum?.name || "Sin foro"
-      }</span>
+            <span class="badge bg-secondary">${
+              post.forum?.name || "Sin foro"
+            }</span>
           </div>
           <h5 class="card-title">${post.title}</h5>
           <p class="card-text text-muted flex-grow-1">
-            ${post.content.substring(0, 120)}${post.content.length > 120 ? "..." : ""
-      }
+            ${post.content.substring(0, 120)}${
+      post.content.length > 120 ? "..." : ""
+    }
           </p>
           <div class="mt-auto">
             <hr>
@@ -77,8 +79,9 @@ function mostrarPostsRandom(posts) {
               <small class="text-muted">${postDate}</small>
             </div>
             <div class="mt-2">
-              <button class="btn btn-sm btn-secondary w-100" onclick="verPost('${post._id
-      }', '${post.forum?._id || ""}')">
+              <button class="btn btn-sm btn-secondary w-100" onclick="verPost('${
+                post._id
+              }', '${post.forum?._id || ""}')">
                 Ver publicación
               </button>
             </div>

@@ -211,12 +211,12 @@ export const toggleSavePost = async (req, res) => {
     }
 
     const isSaved = user.savedPosts.some(
-      savedPostId => savedPostId.toString() === postId
+      (savedPostId) => savedPostId.toString() === postId
     );
 
     if (isSaved) {
       user.savedPosts = user.savedPosts.filter(
-        savedPostId => savedPostId.toString() !== postId
+        (savedPostId) => savedPostId.toString() !== postId
       );
     } else {
       user.savedPosts.push(postId);
@@ -226,7 +226,7 @@ export const toggleSavePost = async (req, res) => {
 
     res.json({
       status: "success",
-      message: `Post ${!isSaved ? 'saved' : 'removed from saved'} successfully`,
+      message: `Post ${!isSaved ? "saved" : "removed from saved"} successfully`,
       payload: {
         isSaved: !isSaved,
       },
@@ -245,27 +245,26 @@ export const getSavedPosts = async (req, res) => {
   try {
     const { id: userId } = req.params;
 
-    const user = await User.findById(userId)
-      .populate({
-        path: 'savedPosts',
-        populate: [
-          {
-            path: 'author',
-            select: 'username email',
+    const user = await User.findById(userId).populate({
+      path: "savedPosts",
+      populate: [
+        {
+          path: "author",
+          select: "username email",
+        },
+        {
+          path: "forum",
+          select: "name",
+        },
+        {
+          path: "comments",
+          populate: {
+            path: "author",
+            select: "username email",
           },
-          {
-            path: 'forum',
-            select: 'name',
-          },
-          {
-            path: 'comments',
-            populate: {
-              path: 'author',
-              select: 'username email',
-            },
-          },
-        ],
-      });
+        },
+      ],
+    });
 
     if (!user) {
       return res.status(404).json({

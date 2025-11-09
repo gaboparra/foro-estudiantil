@@ -10,9 +10,9 @@ async function cerrarSesion() {
   localStorage.removeItem("userId");
 
   await Swal.fire({
-    title: 'La cobra te dice:',
-    text: 'Sesión cerrada',
-    confirmButtonText: 'Aceptar'
+    title: "La cobra te dice:",
+    text: "Sesión cerrada",
+    confirmButtonText: "Aceptar",
   });
 
   window.location.href = "index.html";
