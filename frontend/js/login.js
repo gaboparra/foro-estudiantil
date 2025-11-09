@@ -9,7 +9,7 @@ form.addEventListener("submit", async (e) => {
     const res = await fetch("http://localhost:8080/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password }),
     });
 
     const data = await res.json();
@@ -19,24 +19,24 @@ form.addEventListener("submit", async (e) => {
       localStorage.setItem("userId", data.payload.user._id);
 
       await Swal.fire({
-        title: 'La cobra te dice:',
-        text: 'Inicio de sesión exitoso.',
-        confirmButtonText: 'Aceptar'
+        title: "La cobra te dice:",
+        text: "Inicio de sesión exitoso.",
+        confirmButtonText: "Aceptar",
       });
       window.location.href = "./index.html";
     } else {
       Swal.fire({
-        title: 'La cobra te dice:',
+        title: "La cobra te dice:",
         text: data.message || "Error al iniciar sesión.",
-        confirmButtonText: 'Aceptar'
+        confirmButtonText: "Aceptar",
       });
     }
   } catch (err) {
     console.error(err);
     Swal.fire({
-      title: 'La cobra te dice:',
-      text: 'No se pudo iniciar sesión.',
-      confirmButtonText: 'Aceptar'
+      title: "La cobra te dice:",
+      text: "No se pudo iniciar sesión.",
+      confirmButtonText: "Aceptar",
     });
   }
 });

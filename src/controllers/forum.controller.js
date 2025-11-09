@@ -52,10 +52,8 @@ export const createForum = async (req, res) => {
 
 export const getForums = async (req, res) => {
   try {
-    // 📝 NUEVO: Recibir userId como query param
     const { userId } = req.query;
 
-    // 📝 CAMBIADO: Eliminamos sort por isPinned porque ahora es personal
     const forums = await Forum.find()
       .sort({ createdAt: -1 })
       .populate("creator", "username email")
@@ -68,23 +66,20 @@ export const getForums = async (req, res) => {
         },
       });
 
-    // 📝 NUEVO: Obtener los foros fijados por este usuario específico
     let pinnedForumIds = [];
     if (userId) {
       const user = await User.findById(userId).select("pinnedForums");
       if (user && user.pinnedForums) {
-        pinnedForumIds = user.pinnedForums.map(id => id.toString());
+        pinnedForumIds = user.pinnedForums.map((id) => id.toString());
       }
     }
 
-    // 📝 NUEVO: Agregar isPinned personalizado a cada foro
-    const forumsWithPinStatus = forums.map(forum => {
+    const forumsWithPinStatus = forums.map((forum) => {
       const forumObj = forum.toObject();
       forumObj.isPinned = pinnedForumIds.includes(forum._id.toString());
       return forumObj;
     });
 
-    // 📝 NUEVO: Ordenar manualmente (fijados primero, luego por fecha)
     forumsWithPinStatus.sort((a, b) => {
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
@@ -325,7 +320,6 @@ export const deleteForum = async (req, res) => {
       { $pull: { forums: forum._id } }
     );
 
-    // 📝 NUEVO: Limpiar pinnedForums de todos los usuarios que tenían fijado este foro
     await User.updateMany(
       { pinnedForums: forum._id },
       { $pull: { pinnedForums: forum._id } }
@@ -351,7 +345,6 @@ export const togglePinForum = async (req, res) => {
   try {
     const { userId } = req.body;
 
-    // 📝 NUEVO: Validar que venga userId
     if (!userId) {
       return res.status(400).json({
         status: "error",
@@ -367,8 +360,6 @@ export const togglePinForum = async (req, res) => {
       });
     }
 
-    // 📝 CAMBIADO: Ya no validamos si es el creador (cualquiera puede fijar)
-    // 📝 NUEVO: Obtenemos el usuario
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -377,23 +368,19 @@ export const togglePinForum = async (req, res) => {
       });
     }
 
-    // 📝 NUEVO: Verificar si el foro está en pinnedForums del usuario
     const isPinned = user.pinnedForums.some(
-      forumId => forumId.toString() === forum._id.toString()
+      (forumId) => forumId.toString() === forum._id.toString()
     );
 
-    // 📝 CAMBIADO: Modificamos user.pinnedForums en lugar de forum.isPinned
     if (isPinned) {
       // Remover del array
       user.pinnedForums = user.pinnedForums.filter(
-        forumId => forumId.toString() !== forum._id.toString()
+        (forumId) => forumId.toString() !== forum._id.toString()
       );
     } else {
-      // Agregar al array
       user.pinnedForums.push(forum._id);
     }
 
-    // 📝 CAMBIADO: Guardamos el usuario, no el foro
     await user.save();
 
     res.json({

@@ -101,7 +101,7 @@ document.getElementById("editProfileForm").addEventListener("submit", async (e) 
         text: 'Perfil actualizado exitosamente',
         confirmButtonText: 'Aceptar'
       });
-      
+
       if (username !== currentUser.username) {
         localStorage.setItem("username", username);
       }
