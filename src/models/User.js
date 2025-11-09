@@ -32,6 +32,12 @@ const userSchema = new mongoose.Schema(
         ref: "Forum",
       },
     ],
+    savedPosts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post",
+      },
+    ],
   },
   { timestamps: true }
 );

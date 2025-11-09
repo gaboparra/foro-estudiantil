@@ -302,3 +302,59 @@ export const getRandomPosts = async (req, res) => {
     });
   }
 };
+
+export const togglePinPost = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        status: "error",
+        message: "User ID is required",
+      });
+    }
+
+    const post = await Post.findById(req.params.id).populate("forum");
+    if (!post) {
+      return res.status(404).json({
+        status: "error",
+        message: "Post not found",
+      });
+    }
+
+    const forum = await Forum.findById(post.forum._id);
+    if (!forum) {
+      return res.status(404).json({
+        status: "error",
+        message: "Forum not found",
+      });
+    }
+
+    if (forum.creator.toString() !== userId) {
+      return res.status(403).json({
+        status: "error",
+        message: "Only the forum creator can pin/unpin posts",
+      });
+    }
+
+    post.isPinned = !post.isPinned;
+    await post.save();
+
+    res.json({
+      status: "success",
+      message: `Post ${post.isPinned ? "pinned" : "unpinned"} successfully`,
+      payload: {
+        _id: post._id,
+        title: post.title,
+        isPinned: post.isPinned,
+      },
+    });
+  } catch (error) {
+    logger.error("Error toggling pin post:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Error toggling pin post",
+      error: error.message,
+    });
+  }
+};

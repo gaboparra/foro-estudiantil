@@ -5,7 +5,7 @@ const token = localStorage.getItem("token");
 
 let currentEditPostId = null;
 let currentEditCommentId = null;
-let currentSortOrder = 'desc';
+let currentForumCreatorId = null; // ✅ Guardar el ID del creador del foro
 const editModal = new bootstrap.Modal(document.getElementById('editPostModal'));
 const editCommentModal = new bootstrap.Modal(document.getElementById('editCommentModal'));
 
@@ -16,7 +16,7 @@ async function loadForumDetails() {
 
     if (data.status === "error") {
       await Swal.fire({
-        title: 'La cobra te dice:',
+        title: 'ForoEstudio',
         text: data.message,
         confirmButtonText: 'Aceptar'
       });
@@ -25,13 +25,14 @@ async function loadForumDetails() {
     }
 
     const forum = data.payload;
+    currentForumCreatorId = forum.creator._id; // ✅ Guardar ID del creador
     const forumInfoDiv = document.getElementById("forumInfo");
     const createPostSection = document.getElementById("createPostSection");
-
+    
     const premiumBadge = forum.isPremium ? '<span class="badge bg-warning">Premium</span>' : '';
     const isCreator = forum.creator._id === userId;
     const isMember = forum.members.some(m => m._id === userId);
-
+    
     let deleteButton = '';
     if (isCreator) {
       deleteButton = `<button class="btn btn-danger btn-sm" onclick="deleteForum()">Eliminar Foro</button>`;
@@ -63,67 +64,34 @@ async function loadForumDetails() {
 
   } catch (err) {
     console.error(err);
-    await Swal.fire({
-      title: 'La cobra te dice:',
+    Swal.fire({
+      title: 'ForoEstudio',
       text: 'Error al cargar el foro',
       confirmButtonText: 'Aceptar'
     });
   }
 }
 
-async function loadPostsSorted() {
-  try {
-    const res = await fetch(
-      `http://localhost:8080/api/posts/forums/${forumId}/posts/sorted/date?order=${currentSortOrder}`
-    );
-    const data = await res.json();
-
-    if (data.status === "success") {
-      loadPosts(data.payload);
-    }
-  } catch (err) {
-    console.error(err);
-    await Swal.fire({
-      title: 'La cobra te dice:',
-      text: 'Error al ordenar publicaciones',
-      confirmButtonText: 'Aceptar'
-    });
-  }
-}
-
-function toggleSortOrder() {
-  currentSortOrder = currentSortOrder === 'desc' ? 'asc' : 'desc';
-  loadPostsSorted();
-
-  const sortBtn = document.getElementById('sortButton');
-  if (sortBtn) {
-    sortBtn.innerHTML = currentSortOrder === 'desc'
-      ? '🔽 Más nuevas primero'
-      : '🔼 Más antiguas primero';
-  }
-}
-
 function loadPosts(posts) {
   const postsListDiv = document.getElementById("postsList");
-
+  
   if (!posts || posts.length === 0) {
-    postsListDiv.innerHTML = `
-      <p class="text-muted">No hay publicaciones aún</p>
-    `;
+    postsListDiv.innerHTML = '<p class="text-muted">No hay publicaciones aún</p>';
     return;
   }
 
-  postsListDiv.innerHTML = `
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h3 class="mb-0">Publicaciones (${posts.length})</h3>
-      <button class="btn btn-outline-secondary btn-sm" id="sortButton" onclick="toggleSortOrder()">
-        ${currentSortOrder === 'desc' ? 'Más nuevas primero' : 'Más antiguas primero'}
-      </button>
-    </div>
-  `;
+  // ✅ Separar posts fijados y normales
+  const pinnedPosts = posts.filter(p => p.isPinned);
+  const normalPosts = posts.filter(p => !p.isPinned);
+  
+  // ✅ Ordenar: fijados primero, luego normales por fecha
+  const sortedPosts = [...pinnedPosts, ...normalPosts];
 
-  posts.forEach(post => {
+  postsListDiv.innerHTML = '';
+
+  sortedPosts.forEach(post => {
     const isAuthor = post.author._id === userId;
+    const isForumCreator = currentForumCreatorId === userId; // ✅ Verificar si es creador del foro
     const postDate = new Date(post.createdAt).toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'long',
@@ -131,32 +99,58 @@ function loadPosts(posts) {
       hour: '2-digit',
       minute: '2-digit'
     });
-
+    
+    // ✅ Badge de fijado
+    const pinnedBadge = post.isPinned ? '<span class="badge bg-warning text-dark ms-2">📌 Fijado</span>' : '';
+    
     let actionButtons = '';
+    
+    // Botones del autor (editar/eliminar)
     if (isAuthor) {
       const safeTitle = post.title.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
       const safeContent = post.content.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
-
-      actionButtons = `
-        <div class="mt-2">
-          <button class="btn btn-sm btn-outline-primary" onclick='openEditModal("${post._id}", "${safeTitle}", "${safeContent}")'>Editar</button>
-          <button class="btn btn-sm btn-outline-danger" onclick="deletePost('${post._id}')">Eliminar</button>
-        </div>
+      
+      actionButtons += `
+        <button class="btn btn-sm btn-outline-primary" onclick='openEditModal("${post._id}", "${safeTitle}", "${safeContent}")'>Editar</button>
+        <button class="btn btn-sm btn-outline-danger" onclick="deletePost('${post._id}')">Eliminar</button>
+      `;
+    }
+    
+    // ✅ Botón de guardar (para todos los usuarios logueados)
+    if (userId && token) {
+      actionButtons += `
+        <button class="btn btn-sm btn-outline-success" onclick="toggleSavePost('${post._id}')">
+          💾 Guardar
+        </button>
+      `;
+    }
+    
+    // ✅ Botón de fijar (solo para creador del foro)
+    if (isForumCreator) {
+      const pinText = post.isPinned ? 'Desfijar' : 'Fijar';
+      const pinColor = post.isPinned ? 'btn-secondary' : 'btn-warning';
+      actionButtons += `
+        <button class="btn btn-sm ${pinColor}" onclick="togglePinPost('${post._id}')">
+          ${pinText}
+        </button>
       `;
     }
 
     const postDiv = document.createElement('div');
-    postDiv.className = 'card mb-3';
+    postDiv.className = `card mb-3 ${post.isPinned ? 'border-warning' : ''}`; // ✅ Borde amarillo si está fijado
     postDiv.innerHTML = `
       <div class="card-body">
-        <h5 class="card-title">${post.title}</h5>
+        <div class="d-flex align-items-center mb-2">
+          <h5 class="card-title mb-0">${post.title}</h5>
+          ${pinnedBadge}
+        </div>
         <p class="card-text">${post.content}</p>
         <p class="text-muted small">
           <strong>Por:</strong> ${post.author.username} 
           <span class="mx-2">•</span>
           <strong>Fecha:</strong> ${postDate}
         </p>
-        ${actionButtons}
+        ${actionButtons ? `<div class="mt-2 d-flex gap-2">${actionButtons}</div>` : ''}
         
         <hr class="mt-3">
         
@@ -174,16 +168,63 @@ function loadPosts(posts) {
         </div>
       </div>
     `;
-
+    
     postsListDiv.appendChild(postDiv);
-
+    
     loadComments(post._id, post.comments);
   });
 }
 
+// ✅ Nueva función: Fijar/Desfijar post
+async function togglePinPost(postId) {
+  if (!userId || !token) {
+    Swal.fire({
+      title: 'ForoEstudio',
+      text: 'Debes iniciar sesión',
+      confirmButtonText: 'Aceptar'
+    });
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:8080/api/posts/${postId}/pin`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ userId })
+    });
+
+    const data = await res.json();
+
+    if (data.status === "success") {
+      await Swal.fire({
+        title: 'ForoEstudio',
+        text: data.message,
+        confirmButtonText: 'Aceptar'
+      });
+      loadForumDetails();
+    } else {
+      Swal.fire({
+        title: 'ForoEstudio',
+        text: data.message,
+        confirmButtonText: 'Aceptar'
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    Swal.fire({
+      title: 'ForoEstudio',
+      text: 'Error al fijar/desfijar la publicación',
+      confirmButtonText: 'Aceptar'
+    });
+  }
+}
+
 async function loadComments(postId, commentsData) {
   const commentsDiv = document.getElementById(`comments-${postId}`);
-
+  
   if (!commentsData || commentsData.length === 0) {
     commentsDiv.innerHTML = '<p class="text-muted small">No hay comentarios todavía</p>';
     return;
@@ -194,11 +235,11 @@ async function loadComments(postId, commentsData) {
   commentsData.forEach(comment => {
     const isCommentAuthor = comment.author._id === userId;
     const commentDate = new Date(comment.createdAt).toLocaleDateString();
-
+    
     let commentActions = '';
     if (isCommentAuthor) {
       const safeContent = comment.content.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
-
+      
       commentActions = `
         <div class="comment-actions">
           <button class="btn btn-sm btn-link p-0 me-2" onclick='openEditCommentModal("${comment._id}", "${safeContent}")'>Editar</button>
@@ -219,7 +260,7 @@ async function loadComments(postId, commentsData) {
         ${commentActions}
       </div>
     `;
-
+    
     commentsDiv.appendChild(commentDiv);
   });
 }
@@ -228,8 +269,8 @@ async function addComment(postId) {
   const content = document.getElementById(`commentContent-${postId}`).value.trim();
 
   if (!content) {
-    await Swal.fire({
-      title: 'La cobra te dice:',
+    Swal.fire({
+      title: 'ForoEstudio',
       text: 'Por favor escribe un comentario',
       confirmButtonText: 'Aceptar'
     });
@@ -237,8 +278,8 @@ async function addComment(postId) {
   }
 
   if (!userId || !token) {
-    await Swal.fire({
-      title: 'La cobra te dice:',
+    Swal.fire({
+      title: 'ForoEstudio',
       text: 'Debes iniciar sesión',
       confirmButtonText: 'Aceptar'
     });
@@ -264,16 +305,16 @@ async function addComment(postId) {
       document.getElementById(`commentContent-${postId}`).value = '';
       loadForumDetails();
     } else {
-      await Swal.fire({
-        title: 'La cobra te dice:',
+      Swal.fire({
+        title: 'ForoEstudio',
         text: data.message || 'Error al crear el comentario',
         confirmButtonText: 'Aceptar'
       });
     }
   } catch (err) {
     console.error(err);
-    await Swal.fire({
-      title: 'La cobra te dice:',
+    Swal.fire({
+      title: 'ForoEstudio',
       text: 'Error al crear el comentario',
       confirmButtonText: 'Aceptar'
     });
@@ -290,8 +331,8 @@ document.getElementById('saveEditCommentBtn').addEventListener('click', async ()
   const content = document.getElementById('editCommentContent').value.trim();
 
   if (!content) {
-    await Swal.fire({
-      title: 'La cobra te dice:',
+    Swal.fire({
+      title: 'ForoEstudio',
       text: 'El comentario no puede estar vacío',
       confirmButtonText: 'Aceptar'
     });
@@ -312,23 +353,23 @@ document.getElementById('saveEditCommentBtn').addEventListener('click', async ()
 
     if (data.status === "success") {
       await Swal.fire({
-        title: 'La cobra te dice:',
+        title: 'ForoEstudio',
         text: 'Comentario actualizado exitosamente',
         confirmButtonText: 'Aceptar'
       });
       editCommentModal.hide();
       loadForumDetails();
     } else {
-      await Swal.fire({
-        title: 'La cobra te dice:',
+      Swal.fire({
+        title: 'ForoEstudio',
         text: data.message || 'Error al actualizar el comentario',
         confirmButtonText: 'Aceptar'
       });
     }
   } catch (err) {
     console.error(err);
-    await Swal.fire({
-      title: 'La cobra te dice:',
+    Swal.fire({
+      title: 'ForoEstudio',
       text: 'Error al actualizar el comentario',
       confirmButtonText: 'Aceptar'
     });
@@ -337,7 +378,7 @@ document.getElementById('saveEditCommentBtn').addEventListener('click', async ()
 
 async function deleteComment(commentId, postId) {
   const result = await Swal.fire({
-    title: 'La cobra te dice:',
+    title: 'ForoEstudio',
     text: '¿Estás seguro de que quieres eliminar este comentario?',
     showCancelButton: true,
     confirmButtonText: 'Sí, eliminar',
@@ -345,9 +386,7 @@ async function deleteComment(commentId, postId) {
     confirmButtonColor: '#d33'
   });
 
-  if (!result.isConfirmed) {
-    return;
-  }
+  if (!result.isConfirmed) return;
 
   try {
     const res = await fetch(`http://localhost:8080/api/comments/${commentId}`, {
@@ -362,22 +401,22 @@ async function deleteComment(commentId, postId) {
 
     if (data.status === "success") {
       await Swal.fire({
-        title: 'La cobra te dice:',
+        title: 'ForoEstudio',
         text: 'Comentario eliminado exitosamente',
         confirmButtonText: 'Aceptar'
       });
       loadForumDetails();
     } else {
-      await Swal.fire({
-        title: 'La cobra te dice:',
+      Swal.fire({
+        title: 'ForoEstudio',
         text: data.message || 'Error al eliminar el comentario',
         confirmButtonText: 'Aceptar'
       });
     }
   } catch (err) {
     console.error(err);
-    await Swal.fire({
-      title: 'La cobra te dice:',
+    Swal.fire({
+      title: 'ForoEstudio',
       text: 'Error al eliminar el comentario',
       confirmButtonText: 'Aceptar'
     });
@@ -391,8 +430,8 @@ document.getElementById('createPostForm').addEventListener('submit', async (e) =
   const content = document.getElementById('postContent').value.trim();
 
   if (!title || !content) {
-    await Swal.fire({
-      title: 'La cobra te dice:',
+    Swal.fire({
+      title: 'ForoEstudio',
       text: 'Por favor completa todos los campos',
       confirmButtonText: 'Aceptar'
     });
@@ -400,8 +439,8 @@ document.getElementById('createPostForm').addEventListener('submit', async (e) =
   }
 
   if (!userId || !token) {
-    await Swal.fire({
-      title: 'La cobra te dice:',
+    Swal.fire({
+      title: 'ForoEstudio',
       text: 'Debes iniciar sesión',
       confirmButtonText: 'Aceptar'
     });
@@ -427,7 +466,7 @@ document.getElementById('createPostForm').addEventListener('submit', async (e) =
 
     if (data.status === "success") {
       await Swal.fire({
-        title: 'La cobra te dice:',
+        title: 'ForoEstudio',
         text: 'Publicación creada exitosamente',
         confirmButtonText: 'Aceptar'
       });
@@ -435,16 +474,16 @@ document.getElementById('createPostForm').addEventListener('submit', async (e) =
       document.getElementById('postContent').value = '';
       loadForumDetails();
     } else {
-      await Swal.fire({
-        title: 'La cobra te dice:',
+      Swal.fire({
+        title: 'ForoEstudio',
         text: data.message || 'Error al crear la publicación',
         confirmButtonText: 'Aceptar'
       });
     }
   } catch (err) {
     console.error(err);
-    await Swal.fire({
-      title: 'La cobra te dice:',
+    Swal.fire({
+      title: 'ForoEstudio',
       text: 'Error al crear la publicación',
       confirmButtonText: 'Aceptar'
     });
@@ -463,8 +502,8 @@ document.getElementById('saveEditBtn').addEventListener('click', async () => {
   const content = document.getElementById('editPostContent').value.trim();
 
   if (!title || !content) {
-    await Swal.fire({
-      title: 'La cobra te dice:',
+    Swal.fire({
+      title: 'ForoEstudio',
       text: 'Por favor completa todos los campos',
       confirmButtonText: 'Aceptar'
     });
@@ -489,23 +528,23 @@ document.getElementById('saveEditBtn').addEventListener('click', async () => {
 
     if (data.status === "success") {
       await Swal.fire({
-        title: 'La cobra te dice:',
+        title: 'ForoEstudio',
         text: 'Publicación actualizada exitosamente',
         confirmButtonText: 'Aceptar'
       });
       editModal.hide();
       loadForumDetails();
     } else {
-      await Swal.fire({
-        title: 'La cobra te dice:',
+      Swal.fire({
+        title: 'ForoEstudio',
         text: data.message || 'Error al actualizar la publicación',
         confirmButtonText: 'Aceptar'
       });
     }
   } catch (err) {
     console.error(err);
-    await Swal.fire({
-      title: 'La cobra te dice:',
+    Swal.fire({
+      title: 'ForoEstudio',
       text: 'Error al actualizar la publicación',
       confirmButtonText: 'Aceptar'
     });
@@ -514,7 +553,7 @@ document.getElementById('saveEditBtn').addEventListener('click', async () => {
 
 async function deletePost(postId) {
   const result = await Swal.fire({
-    title: 'La cobra te dice:',
+    title: 'ForoEstudio',
     text: '¿Estás seguro de que quieres eliminar esta publicación?',
     showCancelButton: true,
     confirmButtonText: 'Sí, eliminar',
@@ -522,9 +561,7 @@ async function deletePost(postId) {
     confirmButtonColor: '#d33'
   });
 
-  if (!result.isConfirmed) {
-    return;
-  }
+  if (!result.isConfirmed) return;
 
   try {
     const res = await fetch(`http://localhost:8080/api/posts/${postId}`, {
@@ -540,22 +577,22 @@ async function deletePost(postId) {
 
     if (data.status === "success") {
       await Swal.fire({
-        title: 'La cobra te dice:',
+        title: 'ForoEstudio',
         text: 'Publicación eliminada exitosamente',
         confirmButtonText: 'Aceptar'
       });
       loadForumDetails();
     } else {
-      await Swal.fire({
-        title: 'La cobra te dice:',
+      Swal.fire({
+        title: 'ForoEstudio',
         text: data.message || 'Error al eliminar la publicación',
         confirmButtonText: 'Aceptar'
       });
     }
   } catch (err) {
     console.error(err);
-    await Swal.fire({
-      title: 'La cobra te dice:',
+    Swal.fire({
+      title: 'ForoEstudio',
       text: 'Error al eliminar la publicación',
       confirmButtonText: 'Aceptar'
     });
@@ -564,7 +601,7 @@ async function deletePost(postId) {
 
 async function deleteForum() {
   const result = await Swal.fire({
-    title: 'La cobra te dice:',
+    title: 'ForoEstudio',
     text: '¿Estás seguro de que quieres eliminar este foro? Esta acción no se puede deshacer.',
     showCancelButton: true,
     confirmButtonText: 'Sí, eliminar',
@@ -572,9 +609,7 @@ async function deleteForum() {
     confirmButtonColor: '#d33'
   });
 
-  if (!result.isConfirmed) {
-    return;
-  }
+  if (!result.isConfirmed) return;
 
   try {
     const res = await fetch(`http://localhost:8080/api/forums/${forumId}`, {
@@ -590,26 +625,65 @@ async function deleteForum() {
 
     if (data.status === "success") {
       await Swal.fire({
-        title: 'La cobra te dice:',
+        title: 'ForoEstudio',
         text: 'Foro eliminado exitosamente',
         confirmButtonText: 'Aceptar'
       });
       window.location.href = "foros.html";
     } else {
-      await Swal.fire({
-        title: 'La cobra te dice:',
+      Swal.fire({
+        title: 'ForoEstudio',
         text: data.message || 'Error al eliminar el foro',
         confirmButtonText: 'Aceptar'
       });
     }
   } catch (err) {
     console.error(err);
-    await Swal.fire({
-      title: 'La cobra te dice:',
+    Swal.fire({
+      title: 'ForoEstudio',
       text: 'Error al eliminar el foro',
       confirmButtonText: 'Aceptar'
     });
   }
 }
+
+window.toggleSavePost = async function(postId) {
+  if (!userId || !token) {
+    return Swal.fire({
+      title: "La cobra te dice:",
+      text: "Debés iniciar sesión para guardar publicaciones",
+      confirmButtonText: "Aceptar"
+    });
+  }
+
+  try {
+    const res = await fetch(`http://localhost:8080/api/users/${userId}/save-post`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ postId })
+    });
+
+    const data = await res.json();
+
+    Swal.fire({
+      title: "La cobra te dice:",
+      text: data.message,
+      confirmButtonText: "Aceptar"
+    });
+
+    loadForumDetails(); // refrescar los posts
+
+  } catch (error) {
+    console.error(error);
+    Swal.fire({
+      title: "La cobra te dice:",
+      text: "Error al guardar la publicación",
+      confirmButtonText: "Aceptar"
+    });
+  }
+};
 
 loadForumDetails();

@@ -71,3 +71,12 @@ body {
 .comment-actions .btn-link:hover {
   text-decoration: underline;
 }
+
+.post-pinned {
+  border-left: 4px solid #0dcaf0;
+  background-color: #f8f9fa;
+}
+
+.post-pinned .card-title {
+  color: #0a58ca;
+}

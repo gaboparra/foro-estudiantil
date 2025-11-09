@@ -1,3 +1,4 @@
+import Post from "../models/Post.js";
 import User from "../models/User.js";
 import logger from "../config/logger.js";
 
@@ -176,6 +177,113 @@ export const changePassword = async (req, res) => {
     res.status(500).json({
       status: "error",
       message: "Error changing password",
+      error: err.message,
+    });
+  }
+};
+
+export const toggleSavePost = async (req, res) => {
+  try {
+    const { postId } = req.body;
+    const { id: userId } = req.params;
+
+    if (!postId) {
+      return res.status(400).json({
+        status: "error",
+        message: "Post ID is required",
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({
+        status: "error",
+        message: "Post not found",
+      });
+    }
+
+    const isSaved = user.savedPosts.some(
+      savedPostId => savedPostId.toString() === postId
+    );
+
+    if (isSaved) {
+      user.savedPosts = user.savedPosts.filter(
+        savedPostId => savedPostId.toString() !== postId
+      );
+    } else {
+      user.savedPosts.push(postId);
+    }
+
+    await user.save();
+
+    res.json({
+      status: "success",
+      message: `Post ${!isSaved ? 'saved' : 'removed from saved'} successfully`,
+      payload: {
+        isSaved: !isSaved,
+      },
+    });
+  } catch (err) {
+    logger.error("Error toggling save post:", err);
+    res.status(500).json({
+      status: "error",
+      message: "Error toggling save post",
+      error: err.message,
+    });
+  }
+};
+
+export const getSavedPosts = async (req, res) => {
+  try {
+    const { id: userId } = req.params;
+
+    const user = await User.findById(userId)
+      .populate({
+        path: 'savedPosts',
+        populate: [
+          {
+            path: 'author',
+            select: 'username email',
+          },
+          {
+            path: 'forum',
+            select: 'name',
+          },
+          {
+            path: 'comments',
+            populate: {
+              path: 'author',
+              select: 'username email',
+            },
+          },
+        ],
+      });
+
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      status: "success",
+      message: "Saved posts fetched successfully",
+      payload: user.savedPosts,
+    });
+  } catch (err) {
+    logger.error("Error getting saved posts:", err);
+    res.status(500).json({
+      status: "error",
+      message: "Error getting saved posts",
       error: err.message,
     });
   }

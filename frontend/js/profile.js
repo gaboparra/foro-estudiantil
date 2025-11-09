@@ -13,6 +13,94 @@ if (!token || !userId) {
 
 let currentUser = null;
 
+async function cargarPostsGuardados() {
+  try {
+    const res = await fetch(`http://localhost:8080/api/users/${userId}/saved-posts`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    const data = await res.json();
+
+    if (data.status === "error") {
+      document.getElementById("postsGuardados").innerHTML = `<p class="text-muted">${data.message}</p>`;
+      return;
+    }
+
+    const savedPosts = data.payload;
+    const postsGuardadosDiv = document.getElementById("postsGuardados");
+
+    if (!savedPosts || savedPosts.length === 0) {
+      postsGuardadosDiv.innerHTML = '<p class="text-muted">No tienes publicaciones guardadas.</p>';
+      return;
+    }
+
+    postsGuardadosDiv.innerHTML = "";
+
+    savedPosts.forEach(post => {
+      const postDiv = document.createElement("div");
+      postDiv.classList.add("post-item", "mb-3", "p-3", "border", "rounded");
+
+      const postDate = post.createdAt ? new Date(post.createdAt).toLocaleDateString() : 'Fecha desconocida';
+      const forumName = post.forum ? post.forum.name : 'Sin foro';
+
+      postDiv.innerHTML = `
+        <div class="d-flex justify-content-between align-items-start">
+          <div class="flex-grow-1">
+            <h5>${post.title}</h5>
+            <p class="text-muted mb-2">${post.content.substring(0, 150)}${post.content.length > 150 ? '...' : ''}</p>
+            <small class="text-muted">
+              <strong>Foro:</strong> ${forumName} | 
+              <strong>Autor:</strong> ${post.author?.username || 'Desconocido'} | 
+              <strong>Fecha:</strong> ${postDate}
+            </small>
+          </div>
+          <button class="btn btn-sm btn-outline-danger ms-3" onclick="quitarDeGuardados('${post._id}')">
+            Quitar
+          </button>
+        </div>
+      `;
+
+      postsGuardadosDiv.appendChild(postDiv);
+    });
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("postsGuardados").innerHTML = '<p class="text-muted">Error al cargar publicaciones guardadas.</p>';
+  }
+}
+
+// Nueva función para quitar un post de guardados
+async function quitarDeGuardados(postId) {
+  if (!confirm("¿Quitar esta publicación de guardados?")) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:8080/api/users/${userId}/save-post`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ postId })
+    });
+
+    const data = await res.json();
+
+    if (data.status === "success") {
+      Swal.fire("Publicación quitada de guardados");
+      cargarPostsGuardados(); 
+    } else {
+      Swal.fire(data.message || "Error al quitar la publicación");
+    }
+  } catch (err) {
+    console.error(err);
+    Swal.fire("Error al quitar la publicación");
+  }
+}
+
 async function cargarPerfil() {
   try {
     const res = await fetch(`http://localhost:8080/api/users/${userId}`, {
@@ -288,3 +376,4 @@ document.getElementById("changePasswordForm").addEventListener("submit", async (
 
 cargarPerfil();
 cargarMisForos();
+cargarPostsGuardados();

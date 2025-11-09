@@ -20,6 +20,7 @@ const postSchema = new mongoose.Schema(
         ref: "Comment",
       },
     ],
+    isPinned: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

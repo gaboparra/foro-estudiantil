@@ -130,6 +130,18 @@ export const getForumById = async (req, res) => {
       });
     }
 
+    // 📝 NUEVO: Ordenar posts - fijados primero, luego por fecha de creación
+    if (forum.posts && forum.posts.length > 0) {
+      forum.posts.sort((a, b) => {
+        // Si 'a' está fijado y 'b' no, 'a' va primero
+        if (a.isPinned && !b.isPinned) return -1;
+        // Si 'b' está fijado y 'a' no, 'b' va primero
+        if (!a.isPinned && b.isPinned) return 1;
+        // Si ambos tienen el mismo estado, ordenar por fecha (más reciente primero)
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+    }
+
     res.json({
       status: "success",
       message: "Forum fetched successfully",
@@ -373,7 +385,6 @@ export const togglePinForum = async (req, res) => {
     );
 
     if (isPinned) {
-      // Remover del array
       user.pinnedForums = user.pinnedForums.filter(
         (forumId) => forumId.toString() !== forum._id.toString()
       );
